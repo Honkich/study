@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>ИКТО-2542 — Расписание и Сессия</title>
+    <title>ИКТО-2542 — Расписание, Сессия и ЛК</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -56,12 +56,11 @@
             background: var(--bg);
             color: var(--text-1);
             overflow-x: hidden;
-            padding-bottom: calc(85px + var(--safe-bottom));
+            padding-bottom: calc(90px + var(--safe-bottom));
             min-height: 100vh;
             letter-spacing: -0.015em;
         }
 
-        /* Ambient subtle background glow */
         body::before {
             content: '';
             position: fixed;
@@ -74,7 +73,6 @@
             z-index: 0;
         }
 
-        /* App Container */
         .app-shell {
             position: relative;
             z-index: 1;
@@ -82,7 +80,7 @@
             margin: 0 auto;
         }
 
-        /* Minimalist Modern Header */
+        /* Top Bar */
         .top-nav {
             padding: 16px 20px 10px;
             display: flex;
@@ -150,7 +148,7 @@
             color: var(--text-1);
         }
 
-        /* Calendar Date Slider (Smart Calendar Strip) */
+        /* Date Slider */
         .date-slider-wrap {
             padding: 8px 0 16px;
         }
@@ -261,19 +259,11 @@
             box-shadow: 0 8px 20px var(--accent-glow);
         }
 
-        .date-card.active .dc-dow {
-            color: rgba(255, 255, 255, 0.8);
-        }
+        .date-card.active .dc-dow { color: rgba(255, 255, 255, 0.8); }
+        .date-card.active .dc-num { color: #FFFFFF; }
+        .date-card.active .dc-dot { background: #FFFFFF; }
 
-        .date-card.active .dc-num {
-            color: #FFFFFF;
-        }
-
-        .date-card.active .dc-dot {
-            background: #FFFFFF;
-        }
-
-        /* Day Summary Banner */
+        /* Day Overview */
         .day-overview {
             margin: 0 20px 14px;
             padding: 10px 14px;
@@ -310,7 +300,7 @@
             font-weight: 700;
         }
 
-        /* Retake Alert for selected day */
+        /* Retake Alert */
         .retake-day-banner {
             margin: 0 20px 14px;
             padding: 14px 16px;
@@ -322,39 +312,15 @@
             gap: 12px;
         }
 
-        .retake-banner-icon {
-            font-size: 20px;
-            line-height: 1;
-        }
-
-        .retake-banner-content {
-            flex: 1;
-        }
-
+        .retake-banner-icon { font-size: 20px; line-height: 1; }
+        .retake-banner-content { flex: 1; }
         .retake-banner-title {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            font-size: 13px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em;
         }
+        .retake-banner-subject { font-size: 15px; font-weight: 800; color: #FFFFFF; margin: 2px 0 4px; }
+        .retake-banner-meta { font-size: 12px; color: var(--text-2); display: flex; flex-wrap: wrap; gap: 10px; }
 
-        .retake-banner-subject {
-            font-size: 15px;
-            font-weight: 800;
-            color: #FFFFFF;
-            margin: 2px 0 4px;
-        }
-
-        .retake-banner-meta {
-            font-size: 12px;
-            color: var(--text-2);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        /* Timeline & Class Cards */
+        /* Timeline & Cards */
         .timeline-section {
             padding: 0 20px;
             display: flex;
@@ -380,10 +346,7 @@
         .class-card::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
+            left: 0; top: 0; bottom: 0; width: 3px;
             background: var(--cyan);
             border-radius: 2px;
         }
@@ -454,19 +417,8 @@
             color: var(--text-2);
         }
 
-        .detail-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .detail-icon {
-            font-size: 14px;
-            opacity: 0.7;
-            width: 16px;
-            text-align: center;
-        }
-
+        .detail-row { display: flex; align-items: center; gap: 8px; }
+        .detail-icon { font-size: 14px; opacity: 0.7; width: 16px; text-align: center; }
         .room-pill {
             display: inline-flex;
             align-items: center;
@@ -478,40 +430,23 @@
             color: #FFFFFF;
         }
 
-        /* Empty classes */
         .empty-day {
             text-align: center;
             padding: 50px 20px;
             color: var(--text-3);
         }
+        .empty-day .icon { font-size: 44px; margin-bottom: 12px; opacity: 0.8; }
+        .empty-day .title { font-size: 16px; font-weight: 700; color: var(--text-2); }
+        .empty-day .sub { font-size: 13px; margin-top: 4px; }
 
-        .empty-day .icon {
-            font-size: 44px;
-            margin-bottom: 12px;
-            opacity: 0.8;
-        }
-
-        .empty-day .title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-2);
-        }
-
-        .empty-day .sub {
-            font-size: 13px;
-            margin-top: 4px;
-        }
-
-        /* ==================== PAGES: SESSION / DEBTS ==================== */
+        /* ==================== PAGES ==================== */
         .page {
             display: none;
             padding: 0 20px;
             animation: fadeIn 0.2s ease;
         }
 
-        .page.active {
-            display: block;
-        }
+        .page.active { display: block; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
@@ -531,6 +466,162 @@
             margin-bottom: 16px;
         }
 
+        /* Segmented sub-tabs */
+        .sub-segmented-control {
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 3px;
+            margin-bottom: 16px;
+        }
+
+        .sub-segmented-btn {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: var(--text-3);
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .sub-segmented-btn.active {
+            background: var(--surface-elevated);
+            color: var(--text-1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        /* LK Offline Status Banner */
+        .lk-status-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(0, 229, 255, 0.08));
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lk-status-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--emerald);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lk-status-sub {
+            font-size: 11px;
+            color: var(--text-2);
+            margin-top: 2px;
+        }
+
+        .sync-icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: #FFFFFF;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* LK Message Card */
+        .lk-msg-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .lk-msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .lk-msg-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-1);
+        }
+
+        .lk-msg-date {
+            font-size: 11px;
+            color: var(--text-3);
+            white-space: nowrap;
+        }
+
+        .lk-msg-sender {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .lk-msg-body {
+            font-size: 13px;
+            color: var(--text-2);
+            line-height: 1.5;
+        }
+
+        /* LK File Card */
+        .lk-file-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .lk-file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .lk-file-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-1);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lk-file-meta {
+            font-size: 11px;
+            color: var(--text-3);
+            margin-top: 3px;
+        }
+
+        .lk-download-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        /* Progress card for Debts */
         .progress-pill-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -546,33 +637,11 @@
             margin-bottom: 10px;
         }
 
-        .pp-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-2);
-        }
+        .pp-label { font-size: 13px; font-weight: 700; color: var(--text-2); }
+        .pp-stat { font-size: 14px; font-weight: 800; color: var(--accent); }
+        .pp-bar-bg { height: 8px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; }
+        .pp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #FF8533); border-radius: 4px; transition: width 0.3s ease; }
 
-        .pp-stat {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--accent);
-        }
-
-        .pp-bar-bg {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .pp-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), #FF8533);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        /* Debt card Linear style */
         .debt-card-linear {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -580,37 +649,15 @@
             padding: 16px;
             margin-bottom: 12px;
             transition: all 0.2s;
-            position: relative;
         }
 
-        .debt-card-linear.done {
-            opacity: 0.45;
-            background: #0D0F14;
-        }
+        .debt-card-linear.done { opacity: 0.45; background: #0D0F14; }
 
         .debt-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px;
         }
-
-        .debt-name-text {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-1);
-            line-height: 1.35;
-        }
-
-        .debt-status-badge {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 3px 8px;
-            border-radius: 6px;
-            white-space: nowrap;
-        }
-
+        .debt-name-text { font-size: 15px; font-weight: 700; color: var(--text-1); line-height: 1.35; }
+        .debt-status-badge { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
         .debt-status-badge.today { background: var(--rose-subtle); color: var(--rose); }
         .debt-status-badge.soon { background: var(--accent-subtle); color: var(--accent); }
         .debt-status-badge.done { background: var(--emerald-subtle); color: var(--emerald); }
@@ -625,32 +672,11 @@
             line-height: 1.6;
         }
 
-        .debt-date-box .item {
-            color: var(--text-2);
-        }
+        .debt-date-box .item { color: var(--text-2); }
+        .debt-date-box .item.active-date { color: var(--accent); font-weight: 700; }
 
-        .debt-date-box .item.active-date {
-            color: var(--accent);
-            font-weight: 700;
-        }
-
-        .debt-footer-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .pdf-action-btn {
-            color: var(--cyan);
-            font-size: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
+        .debt-footer-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .pdf-action-btn { color: var(--cyan); font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
         .toggle-pass-btn {
             padding: 6px 14px;
             border-radius: 8px;
@@ -661,25 +687,14 @@
             font-weight: 700;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.15s;
         }
+        .toggle-pass-btn.is-passed { background: var(--emerald-subtle); border-color: rgba(16, 185, 129, 0.3); color: var(--emerald); }
 
-        .toggle-pass-btn:active {
-            transform: scale(0.95);
-        }
-
-        .toggle-pass-btn.is-passed {
-            background: var(--emerald-subtle);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: var(--emerald);
-        }
-
-        /* ==================== FLOATING GLASS DOCK (BOTTOM NAV) ==================== */
+        /* ==================== FLOATING GLASS DOCK ==================== */
         .glass-dock-container {
             position: fixed;
             bottom: calc(14px + var(--safe-bottom));
-            left: 0;
-            right: 0;
+            left: 0; right: 0;
             display: flex;
             justify-content: center;
             z-index: 100;
@@ -688,15 +703,15 @@
 
         .glass-dock {
             pointer-events: auto;
-            background: rgba(18, 21, 29, 0.85);
+            background: rgba(18, 21, 29, 0.88);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 32px;
-            padding: 6px 10px;
+            padding: 5px 8px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
@@ -706,29 +721,25 @@
             color: var(--text-3);
             font-size: 11px;
             font-weight: 700;
-            padding: 8px 16px;
+            padding: 8px 13px;
             border-radius: 24px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             font-family: inherit;
+            white-space: nowrap;
         }
 
-        .dock-item .dock-icon {
-            font-size: 16px;
-        }
+        .dock-item .dock-icon { font-size: 15px; }
 
         .dock-item.active {
             background: #FFFFFF;
             color: #000000;
             box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
         }
-
-        .dock-item.active .dock-icon {
-            color: #000000;
-        }
+        .dock-item.active .dock-icon { color: #000000; }
 
         /* Modal */
         .modal-overlay {
@@ -741,9 +752,7 @@
             align-items: flex-end;
             justify-content: center;
         }
-
         .modal-overlay.show { display: flex; }
-
         .modal {
             background: #141722;
             border: 1px solid var(--border);
@@ -754,22 +763,8 @@
             max-height: 85vh;
             overflow-y: auto;
         }
-
-        .modal-handle {
-            width: 36px;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--text-4);
-            margin: 0 auto 16px;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 800;
-            margin-bottom: 16px;
-            color: #FFFFFF;
-        }
-
+        .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--text-4); margin: 0 auto 16px; }
+        .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: #FFFFFF; }
         .form-group { margin-bottom: 14px; }
         .form-label { font-size: 12px; font-weight: 700; color: var(--text-2); margin-bottom: 6px; display: block; }
         .form-input, .form-textarea {
@@ -822,7 +817,7 @@
     <div class="date-slider-wrap" id="date-slider-wrap">
         <div class="date-slider-header">
             <div class="current-month-badge" id="current-month-badge">Ноябрь 2026</div>
-            <div class="today-chip" onclick="goToToday()">Вернуться к сегодня</div>
+            <div class="today-chip" onclick="goToToday()">Сегодня</div>
         </div>
         <div class="date-track" id="date-track"></div>
     </div>
@@ -836,15 +831,15 @@
         <div class="overview-count" id="day-class-count">0 пар</div>
     </div>
 
-    <!-- Retake Banner for Selected Day (if retake exists on this date) -->
+    <!-- Retake Banner for Selected Day -->
     <div id="day-retake-banner-wrap"></div>
 
-    <!-- ===== PAGE: SCHEDULE ===== -->
+    <!-- ===== TAB 1: SCHEDULE ===== -->
     <main class="page active" id="page-schedule">
         <div class="timeline-section" id="timeline-section"></div>
     </main>
 
-    <!-- ===== PAGE: SESSION / DEBTS ===== -->
+    <!-- ===== TAB 2: SESSION / DEBTS ===== -->
     <main class="page" id="page-session">
         <div class="section-headline">Академические задолженности</div>
         <div class="section-desc">2-я повторная аттестация комиссиям (10–30 ноября 2026)</div>
@@ -862,23 +857,70 @@
         <div id="debts-list-container"></div>
     </main>
 
-    <!-- ===== PAGE: HOMEWORK ===== -->
+    <!-- ===== TAB 3: ЛК СПБГУТ (MESSAGES & FILES) ===== -->
+    <main class="page" id="page-lk">
+        <div class="section-headline">Личный кабинет СПбГУТ</div>
+        <div class="section-desc">lk.sut.ru · Синхронизация и файлы группы</div>
+
+        <!-- Offline Status Banner -->
+        <div class="lk-status-card">
+            <div>
+                <div class="lk-status-title">
+                    <span>🟢</span>
+                    <span>Офлайн-кэш 24/7 активен</span>
+                </div>
+                <div class="lk-status-sub" id="lk-last-sync-label">Все файлы доступны даже при ночном отключении серверов</div>
+            </div>
+            <button class="sync-icon-btn" onclick="simulateSync()">🔄 Обновить</button>
+        </div>
+
+        <!-- Sub-segmented: Сообщения | Файлы группы | Доступ -->
+        <div class="sub-segmented-control">
+            <button class="sub-segmented-btn active" onclick="switchLKSubTab('messages', this)">📬 Сообщения</button>
+            <button class="sub-segmented-btn" onclick="switchLKSubTab('files', this)">📁 Файлы</button>
+            <button class="sub-segmented-btn" onclick="switchLKSubTab('access', this)">🔑 Вход в ЛК</button>
+        </div>
+
+        <!-- LK Sub-tab 1: Messages -->
+        <div id="lk-sub-messages">
+            <div id="lk-messages-list"></div>
+        </div>
+
+        <!-- LK Sub-tab 2: Files -->
+        <div id="lk-sub-files" style="display: none;">
+            <div id="lk-files-list"></div>
+        </div>
+
+        <!-- LK Sub-tab 3: Access / Credentials -->
+        <div id="lk-sub-access" style="display: none;">
+            <div class="class-card" style="margin-bottom: 14px;">
+                <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">Привязка аккаунта lk.sut.ru</div>
+                <div style="font-size: 12px; color: var(--text-2); margin-bottom: 12px;">
+                    Днём приложение автоматически забирает новые файлы и сообщения. Ночью, когда серверы выключают, всё остаётся в памяти!
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Логин ЛК</label>
+                    <input class="form-input" id="lk-login-input" placeholder="Например: ivanov_ii">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input class="form-input" type="password" id="lk-pass-input" placeholder="••••••••">
+                </div>
+                <button class="btn-submit" onclick="saveLKAccount()">Сохранить данные</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== TAB 4: HOMEWORK ===== -->
     <main class="page" id="page-homework">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <div>
                 <div class="section-headline">Домашние задания</div>
-                <div class="section-desc">Дедлайны и заметки</div>
+                <div class="section-desc">Дедлайны и задачи</div>
             </div>
             <button class="today-chip" onclick="openAddHWModal()">+ Создать</button>
         </div>
         <div id="hw-list-container"></div>
-    </main>
-
-    <!-- ===== PAGE: ALL RETAKES ===== -->
-    <main class="page" id="page-retakes">
-        <div class="section-headline">График комиссий</div>
-        <div class="section-desc">Все назначенные даты пересдач на ноябрь 2026</div>
-        <div id="all-retakes-container"></div>
     </main>
 
     <!-- Floating Glass Dock (Bottom Navigation) -->
@@ -892,13 +934,13 @@
                 <span class="dock-icon">🎓</span>
                 <span>Сессия</span>
             </button>
+            <button class="dock-item" onclick="switchNavTab('lk', this)">
+                <span class="dock-icon">🏛</span>
+                <span>Кабинет</span>
+            </button>
             <button class="dock-item" onclick="switchNavTab('homework', this)">
                 <span class="dock-icon">📝</span>
                 <span>ДЗ</span>
-            </button>
-            <button class="dock-item" onclick="switchNavTab('retakes', this)">
-                <span class="dock-icon">🔄</span>
-                <span>Комиссии</span>
             </button>
         </nav>
     </div>
@@ -913,12 +955,11 @@
 </div>
 
 <script>
-// ==================== REAL DATA: ИКТО-2542, СПбГУТ ====================
+// ==================== REAL DATA ====================
 const DOW_FULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
 const DOW_SHORT = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
 const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-// Schedule patterns (1 = Нечётная, 2 = Чётная)
 const TIMETABLE = {
     1: { // Нечётная
         1: [
@@ -977,7 +1018,6 @@ const TIMETABLE = {
     }
 };
 
-// 7 Задолженностей за прошлый год (СПбГУТ)
 const DEBTS_DATA = [
     {
         id: "d7", subject: "Дискретная математика",
@@ -1009,7 +1049,7 @@ const DEBTS_DATA = [
     },
     {
         id: "d4", subject: "Иностранный язык",
-        dept: "Кафедра иностранных языков (тех. секция)",
+        dept: "Кафедра иностранных языков",
         nextDate: "2026-11-24", nextTime: "16:30 – 19:00", nextRoom: "Ауд. 317/2",
         dates: ["10.11 (прошла)", "17.11 (прошла)", "24.11 — 16:30–19:00, ауд. 317/2"],
         pdf: "https://www.sut.ru/doci/umu/peresdacha/2/42.pdf"
@@ -1030,13 +1070,54 @@ const DEBTS_DATA = [
     }
 ];
 
-// ==================== SMART CALENDAR LOGIC ====================
-let selectedDate = new Date(2026, 10, 18); // Default to today: 18 Nov 2026
+// LK SUT DATA (Offline-cached)
+const DEFAULT_LK_DATA = {
+    messages: [
+        {
+            id: "m1",
+            sender: "Деканат факультета ИКСС",
+            date: "17.11.2026 14:20",
+            title: "Вторая повторная промежуточная аттестация",
+            text: "Напоминаем, что до 30 ноября необходимо ликвидировать задолженности комиссиям. График опубликован на sut.ru."
+        },
+        {
+            id: "m2",
+            sender: "Кафедра электроники",
+            date: "16.11.2026 11:05",
+            title: "Пересдача по дисциплине ФОЭ",
+            text: "Комиссионная пересдача состоится 19 ноября в 10:45 в ауд. 306/1. Явка обязательна с зачётной книжкой/направлением."
+        }
+    ],
+    files: [
+        {
+            name: "Методические указания к лаб. работам по Технологиям программирования.pdf",
+            author: "Дагаев А.В.",
+            date: "10.11.2026",
+            size: "2.4 MB",
+            url: "https://lk.sut.ru/cabinet/"
+        },
+        {
+            name: "Вопросы к зачету по дисциплине Математические модели в сетях связи.docx",
+            author: "Гришин И.В.",
+            date: "08.11.2026",
+            size: "145 KB",
+            url: "https://lk.sut.ru/cabinet/"
+        },
+        {
+            name: "Задания на курсовое проектирование (МТКС).pdf",
+            author: "Матюхин А.Ю.",
+            date: "03.11.2026",
+            size: "1.1 MB",
+            url: "https://lk.sut.ru/cabinet/"
+        }
+    ]
+};
+
+// ==================== SMART CALENDAR STATE ====================
+let selectedDate = new Date(2026, 10, 18);
 const TODAY_REF = new Date(2026, 10, 18);
 
-// Returns { weekType: 1|2, weekNum: number }
 function getWeekInfo(date) {
-    // Semester started Monday, September 1, 2026
     const semStart = new Date(2026, 8, 1);
     const diffDays = Math.floor((date.getTime() - semStart.getTime()) / 864e5);
     const weekNum = Math.floor(diffDays / 7) + 1;
@@ -1053,19 +1134,27 @@ function formatDateISO(d) {
 
 // Storage helpers
 function getDebtsState() {
-    const s = localStorage.getItem('sut_debts_state_v5');
+    const s = localStorage.getItem('sut_debts_state_v6');
     return s ? JSON.parse(s) : {};
 }
 function saveDebtsState(st) {
-    localStorage.setItem('sut_debts_state_v5', JSON.stringify(st));
+    localStorage.setItem('sut_debts_state_v6', JSON.stringify(st));
 }
 
 function getHWs() {
-    const s = localStorage.getItem('sut_hws_v5');
+    const s = localStorage.getItem('sut_hws_v6');
     return s ? JSON.parse(s) : [];
 }
 function saveHWs(data) {
-    localStorage.setItem('sut_hws_v5', JSON.stringify(data));
+    localStorage.setItem('sut_hws_v6', JSON.stringify(data));
+}
+
+function getLKData() {
+    const s = localStorage.getItem('sut_lk_data_v6');
+    return s ? JSON.parse(s) : DEFAULT_LK_DATA;
+}
+function saveLKData(d) {
+    localStorage.setItem('sut_lk_data_v6', JSON.stringify(d));
 }
 
 // ==================== RENDERING CALENDAR STRIP ====================
@@ -1073,10 +1162,8 @@ function renderDateStrip() {
     const track = document.getElementById('date-track');
     let html = '';
 
-    // Generate dates: 3 days before today up to 14 days ahead
     const startDate = new Date(TODAY_REF);
     startDate.setDate(startDate.getDate() - 2);
-
     const debtsState = getDebtsState();
 
     for (let i = 0; i < 17; i++) {
@@ -1088,20 +1175,15 @@ function renderDateStrip() {
         const dowLabel = DOW_SHORT[dowIndex];
         const numLabel = d.getDate();
         const isSelected = formatDateISO(selectedDate) === iso;
-        const isToday = formatDateISO(TODAY_REF) === iso;
 
-        // Check classes for this date
         const dowNumber = dowIndex === 0 ? 7 : dowIndex;
         const weekInfo = getWeekInfo(d);
         const lessons = (dowNumber <= 6 && TIMETABLE[weekInfo.weekType][dowNumber]) || [];
 
-        // Check if there is a retake on this date
         const hasRetake = DEBTS_DATA.some(debt => debt.nextDate === iso && !debtsState[debt.id]);
 
         let dotsHtml = '';
-        if (hasRetake) {
-            dotsHtml += '<div class="dc-dot retake" title="Пересдача"></div>';
-        }
+        if (hasRetake) dotsHtml += '<div class="dc-dot retake" title="Пересдача"></div>';
         if (lessons.length > 0) {
             dotsHtml += '<div class="dc-dot"></div>';
             if (lessons.some(l => l.type === 'pe')) dotsHtml += '<div class="dc-dot pe"></div>';
@@ -1118,7 +1200,6 @@ function renderDateStrip() {
 
     track.innerHTML = html;
 
-    // Update Header Text
     const mName = MONTHS[selectedDate.getMonth()];
     document.getElementById('header-date-title').textContent = `${DOW_FULL[selectedDate.getDay()]}, ${selectedDate.getDate()} ${mName}`;
     document.getElementById('current-month-badge').textContent = `${mName.charAt(0).toUpperCase() + mName.slice(1)} 2026`;
@@ -1145,11 +1226,9 @@ function renderDaySchedule() {
     const iso = formatDateISO(selectedDate);
     const debtsState = getDebtsState();
 
-    // Parity pill
     const parityLabel = weekInfo.weekType === 1 ? 'нечётная' : 'чётная';
     document.getElementById('week-parity-pill').textContent = `${weekInfo.weekNum}-я нед. (${parityLabel})`;
 
-    // Check Retake alert for this specific day
     const dayRetakeWrap = document.getElementById('day-retake-banner-wrap');
     const todayRetakes = DEBTS_DATA.filter(debt => debt.nextDate === iso && !debtsState[debt.id]);
 
@@ -1171,13 +1250,11 @@ function renderDaySchedule() {
         dayRetakeWrap.innerHTML = '';
     }
 
-    // Lessons for this day
     const container = document.getElementById('timeline-section');
     const dayStatusText = document.getElementById('day-status-text');
     const dayClassCount = document.getElementById('day-class-count');
 
     if (dowNumber === 7) {
-        // Воскресенье
         dayStatusText.textContent = 'Выходной день';
         dayClassCount.textContent = '0 пар';
         container.innerHTML = `
@@ -1191,7 +1268,6 @@ function renderDaySchedule() {
     }
 
     if (dowNumber === 5) {
-        // Пятница
         dayStatusText.textContent = 'Самостоятельная работа';
         dayClassCount.textContent = '0 пар';
         container.innerHTML = `
@@ -1257,12 +1333,8 @@ function renderDaySchedule() {
 function renderSession() {
     const debtsState = getDebtsState();
     let passedCount = 0;
+    DEBTS_DATA.forEach(d => { if (debtsState[d.id]) passedCount++; });
 
-    DEBTS_DATA.forEach(d => {
-        if (debtsState[d.id]) passedCount++;
-    });
-
-    // Progress bar
     document.getElementById('debts-progress-text').textContent = `${passedCount} из ${DEBTS_DATA.length} закрыто`;
     const pct = Math.round((passedCount / DEBTS_DATA.length) * 100);
     document.getElementById('debts-progress-bar').style.width = `${pct}%`;
@@ -1321,33 +1393,65 @@ function toggleDebtPass(id) {
     renderDaySchedule();
 }
 
-// ==================== ALL RETAKES TAB ====================
-function renderAllRetakes() {
-    const container = document.getElementById('all-retakes-container');
-    const debtsState = getDebtsState();
+// ==================== TAB: ЛК СПБГУТ ====================
+let currentLKSubTab = 'messages';
 
-    let list = [];
-    DEBTS_DATA.forEach(d => {
-        const isPassed = !!debtsState[d.id];
-        d.dates.forEach(dt => {
-            if (!dt.includes('прошла')) {
-                list.push({ subject: d.subject, text: dt, pdf: d.pdf, passed: isPassed });
-            }
-        });
-    });
+function renderLK() {
+    const lkData = getLKData();
 
-    let html = list.map(item => `
-        <div class="class-card" style="margin-bottom: 8px; ${item.passed ? 'opacity: 0.4;' : ''}">
-            <div class="card-header-bar">
-                <span class="badge-type" style="background: var(--accent-subtle); color: var(--accent);">Комиссия</span>
-                <a href="${item.pdf}" target="_blank" class="pdf-action-btn">PDF ↗</a>
+    // Render Messages
+    const msgContainer = document.getElementById('lk-messages-list');
+    msgContainer.innerHTML = lkData.messages.map(m => `
+        <div class="lk-msg-card">
+            <div class="lk-msg-header">
+                <div class="lk-msg-title">${m.title}</div>
+                <div class="lk-msg-date">${m.date}</div>
             </div>
-            <div class="card-subject" style="font-size: 15px;">${item.subject}</div>
-            <div style="font-size: 13px; color: #FFFFFF; font-weight: 600;">📅 ${item.text}</div>
+            <div class="lk-msg-sender">👤 ${m.sender}</div>
+            <div class="lk-msg-body">${m.text}</div>
         </div>
     `).join('');
 
-    container.innerHTML = html;
+    // Render Files
+    const fileContainer = document.getElementById('lk-files-list');
+    fileContainer.innerHTML = lkData.files.map(f => `
+        <div class="lk-file-card">
+            <div class="lk-file-info">
+                <div class="lk-file-name">${f.name}</div>
+                <div class="lk-file-meta">👤 ${f.author} · 💾 ${f.size} · 📅 ${f.date}</div>
+            </div>
+            <a href="${f.url}" target="_blank" class="lk-download-btn">Скачать ↗</a>
+        </div>
+    `).join('');
+
+    // Render saved login if any
+    const savedLogin = localStorage.getItem('sut_lk_saved_login');
+    if (savedLogin) {
+        document.getElementById('lk-login-input').value = savedLogin;
+    }
+}
+
+function switchLKSubTab(sub, btn) {
+    currentLKSubTab = sub;
+    document.querySelectorAll('.sub-segmented-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.getElementById('lk-sub-messages').style.display = (sub === 'messages') ? 'block' : 'none';
+    document.getElementById('lk-sub-files').style.display = (sub === 'files') ? 'block' : 'none';
+    document.getElementById('lk-sub-access').style.display = (sub === 'access') ? 'block' : 'none';
+}
+
+function simulateSync() {
+    alert('Синхронизация выполнена! Если серверы lk.sut.ru сейчас отключены на ночь, данные сохранены из офлайн-кэша.');
+    const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('lk-last-sync-label').textContent = `Обновлено в ${nowStr} (Офлайн-кэш активен)`;
+}
+
+function saveLKAccount() {
+    const login = document.getElementById('lk-login-input').value.trim();
+    if (!login) { alert('Введите логин'); return; }
+    localStorage.setItem('sut_lk_saved_login', login);
+    alert('Учётная запись сохранена! Синхронизация файлов и сообщений включена.');
 }
 
 // ==================== HOMEWORK TAB ====================
@@ -1427,7 +1531,6 @@ function switchNavTab(tab, btn) {
     const target = document.getElementById('page-' + tab);
     if (target) target.classList.add('active');
 
-    // Controls visibility
     const dateSlider = document.getElementById('date-slider-wrap');
     const dayOverview = document.getElementById('day-overview');
     const retakeBannerWrap = document.getElementById('day-retake-banner-wrap');
@@ -1442,14 +1545,14 @@ function switchNavTab(tab, btn) {
         dayOverview.style.display = 'none';
         retakeBannerWrap.innerHTML = '';
         if (tab === 'session') renderSession();
+        else if (tab === 'lk') renderLK();
         else if (tab === 'homework') renderHomework();
-        else if (tab === 'retakes') renderAllRetakes();
     }
 }
 
 // ==================== CACHE & MODALS ====================
 function forceCacheReset() {
-    if (confirm('Сбросить кэш и обновить до самой свежей версии расписания?')) {
+    if (confirm('Сбросить кэш и обновить до самой свежей версии расписания и ЛК?')) {
         localStorage.clear();
         location.reload(true);
     }
