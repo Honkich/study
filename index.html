@@ -3,720 +3,1464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Учёба — ИКТО-2542</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Bonch Go — ИКТО-2542</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --primary: #4A6CF7;
-            --primary-light: #6B8AFF;
-            --primary-dark: #3451DB;
-            --accent: #1DB9AA;
-            --accent-light: #2DD4C3;
-            --bg: #F0F2F5;
-            --card: #FFFFFF;
-            --text: #1A1A2E;
-            --text-secondary: #6B7280;
-            --text-light: #9CA3AF;
-            --danger: #EF4444;
-            --warning: #F59E0B;
-            --success: #10B981;
-            --border: #E5E7EB;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
-            --shadow-lg: 0 4px 16px rgba(0,0,0,0.1);
-            --radius: 14px;
-            --radius-sm: 10px;
+            --bg-base: #0B0D11;
+            --bg-card: #151922;
+            --bg-card-subtle: #1B202D;
+            --bg-card-green: rgba(16, 185, 129, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            
+            --orange: #FF6B2B;
+            --orange-soft: rgba(255, 107, 43, 0.15);
+            --orange-glow: rgba(255, 107, 43, 0.35);
+
+            --blue: #3B82F6;
+            --blue-badge-bg: rgba(59, 130, 246, 0.18);
+            
+            --green: #10B981;
+            --green-badge-bg: rgba(16, 185, 129, 0.18);
+
+            --yellow: #F59E0B;
+            --yellow-badge-bg: rgba(245, 158, 11, 0.18);
+
+            --red: #EF4444;
+            --red-badge-bg: rgba(239, 68, 68, 0.18);
+
+            --text-white: #FFFFFF;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --text-dark: #4B5563;
+
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-pill: 9999px;
+
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg); color: var(--text); overflow-x: hidden;
-            padding-bottom: calc(70px + var(--safe-bottom)); min-height: 100vh;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .header { background:var(--card); padding:16px 20px 12px; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border); }
-        .header-title { font-size:13px; color:var(--text-secondary); font-weight:500; margin-bottom:2px; }
-        .header-group { font-size:20px; font-weight:700; }
-        .header-program { font-size:11px; color:var(--text-light); margin-top:2px; line-height:1.3; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-white);
+            overflow-x: hidden;
+            padding-bottom: calc(75px + var(--safe-bottom));
+            min-height: 100vh;
+        }
 
-        .page { display:none; padding:16px; animation:fadeIn .25s ease; }
-        .page.active { display:block; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        /* Top Bar */
+        .status-pill-bar {
+            display: flex;
+            justify-content: center;
+            padding-top: 10px;
+            padding-bottom: 4px;
+        }
 
-        .section-title { font-size:18px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-        .section-title .icon { font-size:20px; }
+        .bonch-go-badge {
+            background: #FFFFFF;
+            color: #000000;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 14px;
+            border-radius: var(--radius-pill);
+            letter-spacing: -0.2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-        .card { background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
+        .bonch-go-badge span {
+            color: var(--orange);
+        }
 
-        /* Overview */
-        .overview-scroll { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; margin:0 -16px; padding-left:16px; padding-right:16px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
-        .overview-scroll::-webkit-scrollbar { display:none; }
-        .overview-card { min-width:140px; border-radius:var(--radius); padding:14px; color:white; scroll-snap-align:start; flex-shrink:0; cursor:pointer; }
-        .overview-card.schedule { background:linear-gradient(135deg,var(--primary),var(--primary-light)); }
-        .overview-card.homework { background:linear-gradient(135deg,var(--accent),var(--accent-light)); }
-        .overview-card.retake { background:linear-gradient(135deg,#F59E0B,#FBBF24); }
-        .overview-card.debts { background:linear-gradient(135deg,#EF4444,#F87171); }
-        .overview-card .ov-number { font-size:32px; font-weight:800; line-height:1; }
-        .overview-card .ov-label { font-size:12px; opacity:.9; margin-top:4px; }
+        /* Header */
+        .header {
+            padding: 12px 18px 8px;
+        }
 
-        /* Day selector */
-        .day-selector { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
-        .day-selector::-webkit-scrollbar { display:none; }
-        .day-btn { display:flex; flex-direction:column; align-items:center; padding:8px 14px; border-radius:var(--radius-sm); border:none; background:var(--card); color:var(--text-secondary); font-size:12px; font-weight:600; cursor:pointer; min-width:52px; box-shadow:var(--shadow); transition:all .2s; }
-        .day-btn .day-num { font-size:16px; font-weight:700; margin-top:2px; color:var(--text); }
-        .day-btn.active { background:var(--primary); color:white; }
-        .day-btn.active .day-num { color:white; }
-        .day-btn.today { border:2px solid var(--primary); }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .schedule-date-label { font-size:14px; color:var(--text-secondary); font-weight:600; margin-bottom:12px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+        .header-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-white);
+        }
 
-        /* Lesson card */
-        .lesson-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); display:flex; align-items:flex-start; gap:12px; border-left:4px solid transparent; }
-        .lesson-card.lecture { border-left-color:var(--primary); }
-        .lesson-card.seminar { border-left-color:var(--accent); }
-        .lesson-card.lab { border-left-color:var(--warning); }
-        .lesson-card.practice { border-left-color:var(--success); }
-        .lesson-num { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white; flex-shrink:0; }
-        .lesson-card.lecture .lesson-num { background:var(--primary); }
-        .lesson-card.seminar .lesson-num { background:var(--accent); }
-        .lesson-card.lab .lesson-num { background:var(--warning); }
-        .lesson-card.practice .lesson-num { background:var(--success); }
-        .lesson-info { flex:1; min-width:0; }
-        .lesson-type-time { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
-        .lesson-type { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
-        .lesson-card.lecture .lesson-type { color:var(--primary); }
-        .lesson-card.seminar .lesson-type { color:var(--accent); }
-        .lesson-card.lab .lesson-type { color:var(--warning); }
-        .lesson-card.practice .lesson-type { color:var(--success); }
-        .lesson-time { font-size:13px; font-weight:600; color:var(--text-secondary); }
-        .lesson-name { font-size:15px; font-weight:600; margin-bottom:2px; }
-        .lesson-room { font-size:13px; color:var(--text-light); }
-        .lesson-teacher { font-size:12px; color:var(--text-secondary); margin-top:2px; font-style:italic; }
-        .lesson-note { font-size:11px; color:var(--warning); margin-top:3px; font-weight:500; }
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-        /* HW card */
-        .hw-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
-        .hw-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
-        .hw-subject { font-size:15px; font-weight:700; }
-        .hw-deadline { font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; white-space:nowrap; }
-        .hw-deadline.soon { background:#FEF3C7; color:#D97706; }
-        .hw-deadline.overdue { background:#FEE2E2; color:#DC2626; }
-        .hw-deadline.ok { background:#D1FAE5; color:#059669; }
-        .hw-text { font-size:14px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; }
-        .hw-footer { display:flex; justify-content:space-between; align-items:center; }
-        .hw-status { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-light); cursor:pointer; }
-        .hw-check { width:22px; height:22px; border-radius:6px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; transition:all .2s; background:white; }
-        .hw-check.done { background:var(--success); border-color:var(--success); color:white; }
-        .hw-delete { background:none; border:none; color:var(--text-light); font-size:18px; cursor:pointer; padding:4px; border-radius:6px; }
-        .hw-done-card { opacity:.5; }
-        .hw-done-card .hw-subject { text-decoration:line-through; }
+        .header-icon-btn {
+            background: none;
+            border: none;
+            color: var(--orange);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+        }
 
-        /* Retake card */
-        .retake-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); border-left:4px solid var(--danger); }
-        .retake-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-        .retake-subject { font-size:15px; font-weight:700; }
-        .retake-date { font-size:13px; font-weight:600; color:var(--danger); }
-        .retake-info { font-size:13px; color:var(--text-secondary); line-height:1.4; }
-        .retake-footer { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
-        .retake-days-left { font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; background:#FEE2E2; color:#DC2626; }
-        .retake-delete { background:none; border:none; color:var(--text-light); font-size:18px; cursor:pointer; padding:4px; border-radius:6px; }
+        .header-icon-btn:active {
+            transform: scale(0.9);
+        }
 
-        /* Debt / Session card */
-        .debt-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); border-left:4px solid var(--danger); transition:all .3s; }
-        .debt-card.has-retake { border-left-color:var(--warning); }
-        .debt-card.passed { border-left-color:var(--success); opacity:.6; }
-        .debt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-        .debt-subject { font-size:15px; font-weight:700; }
-        .debt-status { font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; }
-        .debt-status.not-passed { background:#FEE2E2; color:#DC2626; }
-        .debt-status.retake-set { background:#FEF3C7; color:#D97706; }
-        .debt-status.passed { background:#D1FAE5; color:#059669; }
-        .debt-details { font-size:13px; color:var(--text-secondary); line-height:1.5; }
-        .debt-details .detail-row { display:flex; align-items:center; gap:6px; margin-top:3px; }
-        .debt-actions { display:flex; gap:8px; margin-top:10px; }
-        .debt-btn { padding:7px 14px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
-        .debt-btn.pass { background:#D1FAE5; color:#059669; }
-        .debt-btn.pass:active { background:#059669; color:white; }
-        .debt-btn.unpass { background:#FEE2E2; color:#DC2626; }
-        .debt-btn.edit { background:var(--bg); color:var(--text-secondary); }
+        .header-date-range {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
 
-        .attestation-banner { background:linear-gradient(135deg,#EF4444,#F97316); color:white; border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; }
-        .attestation-banner .ab-title { font-size:15px; font-weight:700; margin-bottom:4px; }
-        .attestation-banner .ab-dates { font-size:13px; opacity:.9; }
-        .attestation-banner .ab-info { font-size:12px; opacity:.8; margin-top:4px; }
+        /* View Mode Segmented Control (День, Неделя, Список) */
+        .view-segmented {
+            display: flex;
+            background: #141720;
+            border-radius: 12px;
+            padding: 3px;
+            margin: 12px 18px 14px;
+            border: 1px solid var(--border-subtle);
+        }
 
-        /* Stats */
-        .debt-stats { display:flex; gap:10px; margin-bottom:16px; }
-        .debt-stat { flex:1; background:var(--card); border-radius:var(--radius-sm); padding:12px; text-align:center; box-shadow:var(--shadow); }
-        .debt-stat .ds-num { font-size:24px; font-weight:800; }
-        .debt-stat .ds-label { font-size:11px; color:var(--text-light); margin-top:2px; }
-        .debt-stat.total .ds-num { color:var(--danger); }
-        .debt-stat.retake .ds-num { color:var(--warning); }
-        .debt-stat.done .ds-num { color:var(--success); }
+        .segmented-btn {
+            flex: 1;
+            padding: 8px 0;
+            text-align: center;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
 
-        /* Empty state */
-        .empty-state { text-align:center; padding:40px 20px; color:var(--text-light); }
-        .empty-state .empty-icon { font-size:48px; margin-bottom:12px; }
-        .empty-state .empty-text { font-size:15px; font-weight:500; }
+        .segmented-btn.active {
+            background: #252A38;
+            color: var(--text-white);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
 
-        .no-classes { text-align:center; padding:40px 20px; }
-        .no-classes .emoji { font-size:48px; margin-bottom:8px; }
-        .no-classes .text { color:var(--text-light); font-size:15px; font-weight:500; }
+        /* Calendar Strip (Days of week) */
+        .calendar-strip-container {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin-bottom: 14px;
+        }
 
-        /* FAB */
-        .fab { position:fixed; bottom:calc(80px + var(--safe-bottom)); right:20px; width:56px; height:56px; border-radius:16px; background:var(--primary); color:white; border:none; font-size:28px; cursor:pointer; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; z-index:90; transition:transform .2s; }
-        .fab:active { transform:scale(.9); }
+        .strip-arrow {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            padding: 8px 4px;
+            cursor: pointer;
+        }
 
-        /* Bottom Nav */
-        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); display:flex; justify-content:space-around; padding:6px 0; padding-bottom:calc(6px + var(--safe-bottom)); border-top:1px solid var(--border); z-index:100; }
-        .nav-item { display:flex; flex-direction:column; align-items:center; gap:1px; padding:4px 8px; border:none; background:none; color:var(--text-light); font-size:10px; font-weight:600; cursor:pointer; border-radius:10px; transition:color .2s; }
-        .nav-item .nav-icon { font-size:20px; }
-        .nav-item.active { color:var(--primary); }
+        .calendar-strip {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            overflow-x: auto;
+            scrollbar-width: none;
+            justify-content: space-between;
+        }
 
-        /* Week toggle */
-        .week-toggle { display:flex; background:var(--bg); border-radius:var(--radius-sm); padding:3px; margin-bottom:14px; }
-        .week-toggle-btn { flex:1; padding:8px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary); transition:all .2s; font-family:inherit; }
-        .week-toggle-btn.active { background:var(--card); color:var(--text); box-shadow:var(--shadow); }
-        .week-auto-badge { display:inline-block; font-size:10px; padding:2px 6px; border-radius:10px; background:var(--primary); color:white; margin-left:4px; vertical-align:middle; font-weight:600; }
+        .calendar-strip::-webkit-scrollbar {
+            display: none;
+        }
 
-        .schedule-actions { display:flex; gap:8px; margin-bottom:14px; }
-        .schedule-action-btn { padding:8px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+        .day-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            background: #131722;
+            color: var(--text-secondary);
+            cursor: pointer;
+            min-width: 46px;
+            flex: 1;
+            transition: all 0.2s;
+        }
 
-        /* Filter tabs */
-        .filter-tabs { display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; }
-        .filter-tabs::-webkit-scrollbar { display:none; }
-        .filter-tab { padding:7px 14px; border-radius:20px; border:none; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; background:var(--card); color:var(--text-secondary); box-shadow:var(--shadow); transition:all .2s; }
-        .filter-tab.active { background:var(--primary); color:white; }
+        .day-pill .dp-dow {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .day-pill .dp-date {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+
+        /* Stripes under day indicating classes */
+        .dp-stripes {
+            display: flex;
+            gap: 2px;
+            margin-top: 6px;
+            height: 3px;
+            width: 16px;
+            border-radius: 2px;
+            justify-content: center;
+        }
+
+        .dp-stripe {
+            width: 4px;
+            height: 3px;
+            border-radius: 1px;
+            background: var(--blue);
+        }
+
+        .dp-stripe.green { background: var(--green); }
+        .dp-stripe.orange { background: var(--orange); }
+        .dp-stripe.yellow { background: var(--yellow); }
+
+        .day-pill.active {
+            background: var(--orange) !important;
+            border-color: var(--orange) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 14px var(--orange-glow);
+        }
+
+        .day-pill.active .dp-stripe {
+            background: #FFFFFF !important;
+        }
+
+        /* Summary bar (≡ Лекций 2 · Практик 1) */
+        .summary-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 18px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+        }
+
+        .summary-bar .icon {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ==================== PAGES ==================== */
+        .page {
+            display: none;
+            padding: 0 18px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==================== TIMELINE LESSONS ==================== */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .timeline-row {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        /* Left side timeline */
+        .timeline-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 44px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        .time-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .time-badge.blue { background: #3B82F6; }
+        .time-badge.green { background: #10B981; }
+        .time-badge.orange { background: #F97316; }
+        .time-badge.yellow { background: #EAB308; }
+
+        .time-start {
+            font-size: 12px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-top: 5px;
+            letter-spacing: -0.2px;
+        }
+
+        .time-line {
+            width: 2px;
+            flex: 1;
+            min-height: 48px;
+            margin: 6px 0;
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        .time-line.blue { background: #3B82F6; }
+        .time-line.green { background: #10B981; }
+        .time-line.orange { background: #F97316; }
+        .time-line.yellow { background: #EAB308; }
+
+        .time-end {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        /* Right side card */
+        .lesson-card-bonch {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            position: relative;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        .lesson-card-bonch:active {
+            transform: scale(0.99);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .lesson-card-bonch.pe {
+            background: #111B17;
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .type-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            letter-spacing: 0.2px;
+        }
+
+        .type-pill.blue {
+            background: var(--blue-badge-bg);
+            color: #60A5FA;
+        }
+
+        .type-pill.green {
+            background: var(--green-badge-bg);
+            color: #34D399;
+        }
+
+        .type-pill.yellow {
+            background: var(--yellow-badge-bg);
+            color: #FBBF24;
+        }
+
+        .type-pill.orange {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .card-counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-white);
+            line-height: 1.35;
+            margin-bottom: 8px;
+        }
+
+        .card-info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .card-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-arrow {
+            color: var(--text-dark);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* Floating Today Button */
+        .fab-today {
+            position: fixed;
+            bottom: calc(85px + var(--safe-bottom));
+            right: 18px;
+            background: var(--orange);
+            color: #FFFFFF;
+            padding: 12px 20px;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 800;
+            border: none;
+            box-shadow: 0 6px 20px var(--orange-glow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 90;
+            transition: transform 0.15s;
+            font-family: inherit;
+        }
+
+        .fab-today:active {
+            transform: scale(0.94);
+        }
+
+        /* ==================== SESSION / DEBTS STYLES ==================== */
+        .session-banner {
+            background: linear-gradient(135deg, #1E120A, #2C180B);
+            border: 1px solid rgba(255, 107, 43, 0.25);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .sb-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--orange);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sb-dates {
+            font-size: 13px;
+            color: #FFFFFF;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .sb-info {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .debt-item-bonch {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .debt-item-bonch.passed {
+            opacity: 0.5;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .debt-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .debt-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.3;
+        }
+
+        .debt-status-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .debt-status-tag.urgent {
+            background: var(--red-badge-bg);
+            color: #F87171;
+        }
+
+        .debt-status-tag.soon {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .debt-status-tag.done {
+            background: var(--green-badge-bg);
+            color: #34D399;
+        }
+
+        .debt-meta {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .debt-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 3px;
+        }
+
+        .dates-box {
+            background: #0F1219;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            font-size: 11px;
+            line-height: 1.7;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .pdf-link {
+            color: var(--orange);
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .debt-actions-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-bonch {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .btn-bonch.success {
+            background: var(--green);
+            color: #FFFFFF;
+        }
+
+        .btn-bonch.outline {
+            background: #1E2330;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* ==================== BOTTOM NAV ==================== */
+        .bottom-nav-bonch {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #10131B;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 calc(8px + var(--safe-bottom));
+            z-index: 100;
+        }
+
+        .nav-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 14px;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab-btn .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-tab-btn.active {
+            color: var(--orange);
+        }
+
+        .nav-tab-btn.active .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-pill-active {
+            background: #251B13;
+            border-radius: var(--radius-pill);
+            padding: 4px 16px;
+        }
 
         /* Modal */
-        .modal-overlay { position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,.4); z-index:200; display:none; align-items:flex-end; justify-content:center; }
-        .modal-overlay.show { display:flex; }
-        .modal { background:var(--card); border-radius:20px 20px 0 0; padding:24px 20px; padding-bottom:calc(24px + var(--safe-bottom)); width:100%; max-width:500px; max-height:85vh; overflow-y:auto; animation:slideUp .3s ease; }
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        .modal-handle { width:36px; height:4px; border-radius:2px; background:var(--border); margin:0 auto 16px; }
-        .modal-title { font-size:18px; font-weight:700; margin-bottom:16px; }
-        .form-group { margin-bottom:14px; }
-        .form-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; display:block; }
-        .form-input,.form-select,.form-textarea { width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:15px; font-family:inherit; color:var(--text); background:var(--bg); outline:none; transition:border-color .2s; }
-        .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--primary); }
-        .form-textarea { resize:vertical; min-height:80px; }
-        .form-btn { width:100%; padding:14px; border:none; border-radius:var(--radius-sm); background:var(--primary); color:white; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
-        .form-btn:active { transform:scale(.98); background:var(--primary-dark); }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #151922;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 20px calc(24px + var(--safe-bottom));
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .modal-handle {
+            width: 38px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--text-dark);
+            margin: 0 auto 18px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #FFFFFF;
+        }
+
+        .form-group { margin-bottom: 14px; }
+        .form-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0E1118;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #FFFFFF;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--orange);
+        }
+        .form-btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--orange);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .empty-box .icon { font-size: 42px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="header-title">СПбГУТ им. проф. М.А. Бонч-Бруевича</div>
-    <div class="header-group">ИКТО-2542</div>
-    <div class="header-program">11.03.02 Инфокоммуникационные технологии и системы связи</div>
-</div>
-
-<!-- HOME -->
-<div class="page active" id="page-home">
-    <div style="margin-bottom:20px;">
-        <div class="section-title"><span class="icon">👋</span><span id="greeting"></span></div>
-        <div style="color:var(--text-secondary);font-size:14px;" id="today-label"></div>
-        <div style="color:var(--text-light);font-size:12px;margin-top:2px;" id="week-type-label"></div>
-    </div>
-    <div class="overview-scroll" style="margin-bottom:20px;">
-        <div class="overview-card schedule" onclick="switchTab('schedule')">
-            <div class="ov-number" id="home-lessons-count">0</div>
-            <div class="ov-label">Пар сегодня</div>
-        </div>
-        <div class="overview-card homework" onclick="switchTab('homework')">
-            <div class="ov-number" id="home-hw-count">0</div>
-            <div class="ov-label">Активных ДЗ</div>
-        </div>
-        <div class="overview-card debts" onclick="switchTab('session')">
-            <div class="ov-number" id="home-debts-count">0</div>
-            <div class="ov-label">Долгов</div>
-        </div>
-        <div class="overview-card retake" onclick="switchTab('retakes')">
-            <div class="ov-number" id="home-retake-count">0</div>
-            <div class="ov-label">Пересдач</div>
+    <!-- Dynamic Island / Header Logo -->
+    <div class="status-pill-bar">
+        <div class="bonch-go-badge">
+            Bonch <span>Go</span>
         </div>
     </div>
-    <div class="section-title"><span class="icon">📅</span>Пары сегодня</div>
-    <div id="home-today-lessons"></div>
-    <div style="margin-top:20px;"><div class="section-title"><span class="icon">🚨</span>Долги</div><div id="home-debts-preview"></div></div>
-    <div style="margin-top:20px;"><div class="section-title"><span class="icon">📝</span>Ближайшие ДЗ</div><div id="home-upcoming-hw"></div></div>
-</div>
 
-<!-- SCHEDULE -->
-<div class="page" id="page-schedule">
-    <div class="section-title"><span class="icon">📅</span>Расписание</div>
-    <div class="week-toggle">
-        <button class="week-toggle-btn" onclick="setWeekType(1)" id="week-btn-1">Нечётная <span class="week-auto-badge" id="auto-badge-1" style="display:none">сейчас</span></button>
-        <button class="week-toggle-btn" onclick="setWeekType(2)" id="week-btn-2">Чётная <span class="week-auto-badge" id="auto-badge-2" style="display:none">сейчас</span></button>
-    </div>
-    <div class="day-selector" id="day-selector"></div>
-    <div class="schedule-date-label" id="schedule-date-label"></div>
-    <div id="schedule-lessons"></div>
-    <div class="schedule-actions"><button class="schedule-action-btn" onclick="openEditScheduleModal()">✏️ Редактировать</button></div>
-</div>
-
-<!-- HOMEWORK -->
-<div class="page" id="page-homework">
-    <div class="section-title"><span class="icon">📝</span>Домашние задания</div>
-    <div class="filter-tabs">
-        <button class="filter-tab active" onclick="filterHW('all',this)">Все</button>
-        <button class="filter-tab" onclick="filterHW('active',this)">Активные</button>
-        <button class="filter-tab" onclick="filterHW('done',this)">Выполненные</button>
-        <button class="filter-tab" onclick="filterHW('overdue',this)">Просроченные</button>
-    </div>
-    <div id="hw-list"></div>
-</div>
-
-<!-- SESSION (DEBTS) -->
-<div class="page" id="page-session">
-    <div class="section-title"><span class="icon">🎓</span>Сессия / Долги</div>
-
-    <div class="attestation-banner">
-        <div class="ab-title">📋 2-я повторная аттестация (комиссии)</div>
-        <div class="ab-dates">📆 10 — 30 ноября 2026</div>
-        <div class="ab-info">Расписание по кафедрам на sut.ru/studentu/raspisanie</div>
+    <!-- Main Header -->
+    <div class="header">
+        <div class="header-top">
+            <div class="header-title">ИКТО-2542</div>
+            <div class="header-icons">
+                <button class="header-icon-btn" onclick="switchTab('session')" title="Сессия">🎓</button>
+                <button class="header-icon-btn" onclick="switchTab('homework')" title="ДЗ">📋</button>
+                <button class="header-icon-btn" onclick="resetCache()" title="Сброс кэша">🔄</button>
+            </div>
+        </div>
+        <div class="header-date-range" id="header-date-range">23 ноября – 28 ноября</div>
     </div>
 
-    <div class="debt-stats">
-        <div class="debt-stat total"><div class="ds-num" id="debt-total">0</div><div class="ds-label">Всего долгов</div></div>
-        <div class="debt-stat retake"><div class="ds-num" id="debt-retake">0</div><div class="ds-label">Назначено</div></div>
-        <div class="debt-stat done"><div class="ds-num" id="debt-done">0</div><div class="ds-label">Сдано</div></div>
+    <!-- Segmented Control: День | Неделя | Список -->
+    <div class="view-segmented">
+        <button class="segmented-btn active" onclick="setViewMode('day', this)">День</button>
+        <button class="segmented-btn" onclick="toggleWeekType(this)" id="btn-week-toggle">Нечётная</button>
+        <button class="segmented-btn" onclick="setViewMode('list', this)">Список</button>
     </div>
 
-    <div id="debts-list"></div>
-
-    <button class="schedule-action-btn" onclick="openAddDebtModal()" style="margin-top:8px;">➕ Добавить долг</button>
-</div>
-
-<!-- RETAKES -->
-<div class="page" id="page-retakes">
-    <div class="section-title"><span class="icon">🔄</span>Пересдачи</div>
-    <div id="retakes-list"></div>
-</div>
-
-<!-- FAB -->
-<button class="fab" id="fab-btn" onclick="openAddModal()">+</button>
-
-<!-- Bottom Nav -->
-<div class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('home')" data-tab="home"><span class="nav-icon">🏠</span><span>Главная</span></button>
-    <button class="nav-item" onclick="switchTab('schedule')" data-tab="schedule"><span class="nav-icon">📅</span><span>Расписание</span></button>
-    <button class="nav-item" onclick="switchTab('session')" data-tab="session"><span class="nav-icon">🎓</span><span>Сессия</span></button>
-    <button class="nav-item" onclick="switchTab('homework')" data-tab="homework"><span class="nav-icon">📝</span><span>ДЗ</span></button>
-    <button class="nav-item" onclick="switchTab('retakes')" data-tab="retakes"><span class="nav-icon">🔄</span><span>Пересдачи</span></button>
-</div>
-
-<!-- Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-handle"></div>
-        <div id="modal-content"></div>
+    <!-- Calendar Day Strip -->
+    <div class="calendar-strip-container" id="calendar-strip-wrap">
+        <button class="strip-arrow" onclick="navDay(-1)">❮</button>
+        <div class="calendar-strip" id="calendar-strip"></div>
+        <button class="strip-arrow" onclick="navDay(1)">❯</button>
     </div>
-</div>
+
+    <!-- Summary Bar (≡ Лекций 2 · Практик 1) -->
+    <div class="summary-bar" id="summary-bar">
+        <span class="icon">≡</span>
+        <span id="summary-text">Загрузка занятий...</span>
+    </div>
+
+    <!-- ===== PAGE: SCHEDULE (TIMELINE) ===== -->
+    <div class="page active" id="page-schedule">
+        <div class="timeline-container" id="timeline-list"></div>
+    </div>
+
+    <!-- ===== PAGE: SESSION / DEBTS ===== -->
+    <div class="page" id="page-session">
+        <div class="session-banner">
+            <div class="sb-title">🏛 Вторая повторная аттестация</div>
+            <div class="sb-dates">📆 10 — 30 ноября 2026 (комиссии)</div>
+            <div class="sb-info">Официальные расписания с сайта СПбГУТ (sut.ru/studentu/raspisanie)</div>
+        </div>
+        <div id="debts-container"></div>
+        <button class="btn-bonch outline" style="width: 100%; padding: 12px; margin-top: 10px;" onclick="openAddDebtModal()">➕ Добавить предмет</button>
+    </div>
+
+    <!-- ===== PAGE: HOMEWORK ===== -->
+    <div class="page" id="page-homework">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <div style="font-size: 18px; font-weight: 800;">Домашние задания</div>
+            <button class="btn-bonch success" onclick="openAddHWModal()">+ Новое ДЗ</button>
+        </div>
+        <div id="hw-container"></div>
+    </div>
+
+    <!-- ===== PAGE: RETAKES ===== -->
+    <div class="page" id="page-retakes">
+        <div style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Календарь пересдач</div>
+        <div id="retakes-container"></div>
+    </div>
+
+    <!-- Floating Today Button -->
+    <button class="fab-today" id="fab-today" onclick="goToToday()">
+        <span>📅</span> Сегодня
+    </button>
+
+    <!-- Bottom Navigation Bar (Bonch Go Style) -->
+    <div class="bottom-nav-bonch">
+        <button class="nav-tab-btn active" onclick="switchTab('schedule')" data-tab="schedule">
+            <span class="nav-icon">📅</span>
+            <span>Пары</span>
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('session')" data-tab="session">
+            <span class="nav-icon">🎓</span>
+            <span>Сессия</span>
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('homework')" data-tab="homework">
+            <span class="nav-icon">📝</span>
+            <span>ДЗ</span>
+        </button>
+        <button class="nav-tab-btn" onclick="switchTab('retakes')" data-tab="retakes">
+            <span class="nav-icon">🔄</span>
+            <span>Даты</span>
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
 
 <script>
-const DAYS=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-const DAYS_SHORT=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-const MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+// ==================== REAL DATA: ИКТО-2542, СПбГУТ ====================
+const DAYS_NAMES = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const DAYS_SHORT = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const MONTHS_NAMES = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-// ========== REAL SCHEDULE: ИКТО-2542, СПбГУТ ==========
-const DEFAULT_SCHEDULE={"1":{"1":[{num:2,type:"lecture",name:"Технологии программирования",time:"10:45 - 12:20",room:"Ауд. 110, Б22/1",teacher:"Дагаев А.В."},{num:3,type:"lecture",name:"Математические модели в сетях связи",time:"13:00 - 14:35",room:"Ауд. 106, Б22/1",teacher:"Гришин И.В."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"2":[{num:1,type:"lab",name:"Математические модели в сетях связи",time:"09:00 - 10:35",room:"Ауд. 417, Б22/2",teacher:"Лобастова М.В."},{num:2,type:"lab",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 504, Б22/1",teacher:"Шемякин С.Н."}],"3":[{num:1,type:"practice",name:"Материалы электронной техники",time:"09:00 - 10:35",room:"Ауд. 413, Б22/1",teacher:"Арсирий А.И.",note:"13-я неделя"},{num:2,type:"lecture",name:"Физика (спецглавы)",time:"10:45 - 12:20",room:"Ауд. 704, Б22/1",teacher:"Урванцева Н.Л."},{num:3,type:"practice",name:"Электропитание устройств и систем ТК",time:"13:00 - 14:35",room:"Ауд. 406, Б22/2",teacher:"Виноградов П.Ю."},{num:4,type:"lab",name:"Физика (спецглавы)",time:"14:45 - 16:20",room:"Ауд. 317, Б22/1",teacher:"Урванцева Н.Л."},{num:5,type:"practice",name:"Многоканальные ТК системы",time:"16:30 - 18:05",room:"Ауд. 447, Б22/2",teacher:"Герасимов А.М."}],"4":[{num:1,type:"lab",name:"Электроника",time:"09:00 - 10:35",room:"Ауд. 446, Б22/1",teacher:"Ланда А.Э."},{num:2,type:"lecture",name:"Электроника",time:"10:45 - 12:20",room:"Ауд. 112, Б22/1",teacher:"Ланда А.Э."},{num:3,type:"lecture",name:"Многоканальные ТК системы",time:"13:00 - 14:35",room:"Ауд. 112, Б22/1",teacher:"Матюхин А.Ю."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"5":[],"6":[{num:1,type:"lab",name:"Технологии программирования",time:"09:00 - 10:35",room:"Ауд. 515, Б22/2",teacher:"Дагаев А.В."},{num:2,type:"practice",name:"Теория вероятностей и мат. статистика",time:"10:45 - 12:20",room:"Ауд. 511, Б22/2",teacher:"Воронова М.В."},{num:3,type:"practice",name:"Теория вероятностей и мат. статистика",time:"13:00 - 14:35",room:"Ауд. 511, Б22/2",teacher:"Воронова М.В."}]},"2":{"1":[{num:1,type:"practice",name:"Технологии программирования",time:"09:00 - 10:35",room:"Ауд. 233, Б22/2",teacher:"Дагаев А.В."},{num:2,type:"lecture",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 110, Б22/1",teacher:"Бабков И.Н."}],"2":[{num:1,type:"practice",name:"Математические модели в сетях связи",time:"09:00 - 10:35",room:"Ауд. 417, Б22/2",teacher:"Лобастова М.В."},{num:2,type:"practice",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 504, Б22/1",teacher:"Шемякин С.Н."},{num:3,type:"practice",name:"Электроника",time:"13:00 - 14:35",room:"Ауд. 446, Б22/1",teacher:"Ланда А.Э."},{num:4,type:"lab",name:"Материалы электронной техники",time:"14:45 - 16:20",room:"Ауд. 413, Б22/1",teacher:"Арсирий А.И."}],"3":[{num:3,type:"lab",name:"Электропитание устройств и систем ТК",time:"13:00 - 14:35",room:"Ауд. 406, Б22/2",teacher:"Копылова И.В."},{num:4,type:"practice",name:"Физика (спецглавы)",time:"14:45 - 16:20",room:"Ауд. 301, Б22/1",teacher:"Урванцева Н.Л."},{num:5,type:"lab",name:"Многоканальные ТК системы",time:"16:30 - 18:05",room:"Ауд. 447, Б22/2",teacher:"Герасимов А.М."}],"4":[{num:1,type:"lecture",name:"Электропитание устройств и систем ТК",time:"09:00 - 10:35",room:"Ауд. 106, Б22/1",teacher:"Виноградов П.Ю."},{num:2,type:"lecture",name:"Теория вероятностей и мат. статистика",time:"10:45 - 12:20",room:"Ауд. 106, Б22/1",teacher:"Камартина Н.М."},{num:3,type:"lecture",name:"Материалы электронной техники",time:"13:00 - 14:35",room:"Ауд. 106, Б22/1",teacher:"Арсирий А.И."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"5":[],"6":[]}};
+const SCHEDULE_DATA = {
+    // 1: Нечётная неделя
+    1: {
+        1: [ // Пн
+            { num: 2, type: "lecture", typeLabel: "Лекция", name: "Технологии программирования", timeStart: "10:45", timeEnd: "12:20", room: "110/1", teacher: "Дагаев Александр Владимирович", counter: "8 из 10" },
+            { num: 3, type: "lecture", typeLabel: "Лекция", name: "Математические модели в сетях связи", timeStart: "13:00", timeEnd: "14:35", room: "106/1", teacher: "Гришин Илья Владимирович", counter: "8 из 10" },
+            { num: "ФЗ", type: "pe", typeLabel: "Практические занятия", name: "Элективные дисциплины по физической культуре и спорту", timeStart: "15:00", timeEnd: "16:30", room: "Динамит; Ч13В", teacher: "Сапсаева Татьяна Владимировна; Винтовкина Н.Е.", counter: "18 из 24" }
+        ],
+        2: [ // Вт
+            { num: 1, type: "lab", typeLabel: "Лабораторная работа", name: "Математические модели в сетях связи", timeStart: "09:00", timeEnd: "10:35", room: "417/2", teacher: "Лобастова М.В.", counter: "4 из 8" },
+            { num: 2, type: "lab", typeLabel: "Лабораторная работа", name: "Основы защиты информации в телеком. системах", timeStart: "10:45", timeEnd: "12:20", room: "504/1", teacher: "Шемякин С.Н.", counter: "4 из 8" }
+        ],
+        3: [ // Ср
+            { num: 1, type: "practice", typeLabel: "Практические занятия", name: "Материалы электронной техники", timeStart: "09:00", timeEnd: "10:35", room: "413/1", teacher: "Арсирий А.И.", counter: "13-я неделя" },
+            { num: 2, type: "lecture", typeLabel: "Лекция", name: "Физика (спецглавы)", timeStart: "10:45", timeEnd: "12:20", room: "704/1", teacher: "Урванцева Н.Л.", counter: "6 из 8" },
+            { num: 3, type: "practice", typeLabel: "Практические занятия", name: "Электропитание устройств и систем телекоммуникаций", timeStart: "13:00", timeEnd: "14:35", room: "406/2", teacher: "Виноградов П.Ю.", counter: "5 из 8" },
+            { num: 4, type: "lab", typeLabel: "Лабораторная работа", name: "Физика (спецглавы)", timeStart: "14:45", timeEnd: "16:20", room: "317/1", teacher: "Урванцева Н.Л.", counter: "4 из 6" },
+            { num: 5, type: "practice", typeLabel: "Практические занятия", name: "Многоканальные телекоммуникационные системы", timeStart: "16:30", timeEnd: "18:05", room: "447/2", teacher: "Герасимов А.М.", counter: "4 из 8" }
+        ],
+        4: [ // Чт
+            { num: 1, type: "lab", typeLabel: "Лабораторная работа", name: "Электроника", timeStart: "09:00", timeEnd: "10:35", room: "446/1", teacher: "Ланда А.Э.", counter: "5 из 8" },
+            { num: 2, type: "lecture", typeLabel: "Лекция", name: "Электроника", timeStart: "10:45", timeEnd: "12:20", room: "112/1", teacher: "Ланда А.Э.", counter: "7 из 10" },
+            { num: 3, type: "lecture", typeLabel: "Лекция", name: "Многоканальные телекоммуникационные системы", timeStart: "13:00", timeEnd: "14:35", room: "112/1", teacher: "Матюхин А.Ю.", counter: "8 из 10" },
+            { num: "ФЗ", type: "pe", typeLabel: "Практические занятия", name: "Элективные дисциплины по физической культуре и спорту", timeStart: "15:00", timeEnd: "16:30", room: "Динамит; Ч13В", teacher: "Сапсаева Татьяна Владимировна", counter: "19 из 24" }
+        ],
+        5: [], // Пт: день самостоятельной работы
+        6: [ // Сб
+            { num: 1, type: "lab", typeLabel: "Лабораторная работа", name: "Технологии программирования", timeStart: "09:00", timeEnd: "10:35", room: "515/2", teacher: "Дагаев Александр Владимирович", counter: "6 из 8" },
+            { num: 2, type: "practice", typeLabel: "Практические занятия", name: "Теория вероятностей и математическая статистика", timeStart: "10:45", timeEnd: "12:20", room: "511/2", teacher: "Воронова М.В.", counter: "7 из 10" },
+            { num: 3, type: "practice", typeLabel: "Практические занятия", name: "Теория вероятностей и математическая статистика", timeStart: "13:00", timeEnd: "14:35", room: "511/2", teacher: "Воронова М.В.", counter: "8 из 10" }
+        ]
+    },
+    // 2: Чётная неделя
+    2: {
+        1: [
+            { num: 1, type: "practice", typeLabel: "Практические занятия", name: "Технологии программирования", timeStart: "09:00", timeEnd: "10:35", room: "233/2", teacher: "Дагаев Александр Владимирович", counter: "7 из 8" },
+            { num: 2, type: "lecture", typeLabel: "Лекция", name: "Основы защиты информации в телеком. системах", timeStart: "10:45", timeEnd: "12:20", room: "110/1", teacher: "Бабков И.Н.", counter: "8 из 10" }
+        ],
+        2: [
+            { num: 1, type: "practice", typeLabel: "Практические занятия", name: "Математические модели в сетях связи", timeStart: "09:00", timeEnd: "10:35", room: "417/2", teacher: "Лобастова М.В.", counter: "5 из 8" },
+            { num: 2, type: "practice", typeLabel: "Практические занятия", name: "Основы защиты информации в телеком. системах", timeStart: "10:45", timeEnd: "12:20", room: "504/1", teacher: "Шемякин С.Н.", counter: "5 из 8" },
+            { num: 3, type: "practice", typeLabel: "Практические занятия", name: "Электроника", timeStart: "13:00", timeEnd: "14:35", room: "446/1", teacher: "Ланда А.Э.", counter: "6 из 8" },
+            { num: 4, type: "lab", typeLabel: "Лабораторная работа", name: "Материалы электронной техники", timeStart: "14:45", timeEnd: "16:20", room: "413/1", teacher: "Арсирий А.И.", counter: "4 из 6" }
+        ],
+        3: [
+            { num: 3, type: "lab", typeLabel: "Лабораторная работа", name: "Электропитание устройств и систем телекоммуникаций", timeStart: "13:00", timeEnd: "14:35", room: "406/2", teacher: "Копылова И.В.", counter: "3 из 6" },
+            { num: 4, type: "practice", typeLabel: "Практические занятия", name: "Физика (спецглавы)", timeStart: "14:45", timeEnd: "16:20", room: "301/1", teacher: "Урванцева Н.Л.", counter: "5 из 8" },
+            { num: 5, type: "lab", typeLabel: "Лабораторная работа", name: "Многоканальные телекоммуникационные системы", timeStart: "16:30", timeEnd: "18:05", room: "447/2", teacher: "Герасимов А.М.", counter: "5 из 6" }
+        ],
+        4: [
+            { num: 1, type: "lecture", typeLabel: "Лекция", name: "Электропитание устройств и систем телекоммуникаций", timeStart: "09:00", timeEnd: "10:35", room: "106/1", teacher: "Виноградов П.Ю.", counter: "8 из 10" },
+            { num: 2, type: "lecture", typeLabel: "Лекция", name: "Теория вероятностей и математическая статистика", timeStart: "10:45", timeEnd: "12:20", room: "106/1", teacher: "Камартина Н.М.", counter: "7 из 10" },
+            { num: 3, type: "lecture", typeLabel: "Лекция", name: "Материалы электронной техники", timeStart: "13:00", timeEnd: "14:35", room: "106/1", teacher: "Арсирий А.И.", counter: "6 из 8" },
+            { num: "ФЗ", type: "pe", typeLabel: "Практические занятия", name: "Элективные дисциплины по физической культуре и спорту", timeStart: "15:00", timeEnd: "16:30", room: "Динамит; Ч13В", teacher: "Сапсаева Татьяна Владимировна", counter: "20 из 24" }
+        ],
+        5: [],
+        6: []
+    }
+};
 
-// ========== DEFAULT DEBTS ==========
+// 7 Долгов с официальными датами пересдач (10–30 ноября 2026, СПбГУТ)
 const DEFAULT_DEBTS = [
     {
-        id: "d1", subject: "Физические основы электроники (ФОЭ)", status: "retake_set",
-        retakeDate: "2026-11-19", retakeTime: "10:45 - 14:00", retakeInfo: "Ауд. 306/1 (каф. электроники)",
-        allDates: ["12.11 — 15:00–18:05, ауд. 448/1 ✅","17.11 — 15:00–18:05, ауд. 314/1 ✅","19.11 — 10:45–14:00, ауд. 306/1","26.11 — 10:45–14:00, ауд. 306/1"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/84.pdf",
-        commission: "Зав. каф. Шумаков П.П., декан РСР Владыко А.Г.",
-        year: "2025-2026"
+        id: "d1", subject: "Физические основы электроники (ФОЭ)", status: "urgent",
+        date: "2026-11-19", time: "10:45 - 14:00", room: "Ауд. 306/1",
+        dept: "Кафедра электроники",
+        datesList: ["12.11 (прошла) ✅", "17.11 (прошла) ✅", "19.11 10:45–14:00, ауд. 306/1 ⚠️ СКОРО", "26.11 10:45–14:00, ауд. 306/1"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/84.pdf"
     },
     {
-        id: "d2", subject: "Физическая культура", status: "retake_set",
-        retakeDate: "2026-11-27", retakeTime: "09:00 - 15:00", retakeInfo: "СК «Динамит» (каф. ФК)",
-        allDates: ["12.11 — 09:00–15:00, СК «Динамит» ✅","16.11 — 09:00–15:00, СК «Динамит» ✅","27.11 — 09:00–15:00, СК «Динамит»"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/75.pdf",
-        commission: "Зав. каф. Кабаев И.Е., декан СТЭД Шутман Д.В.",
-        year: "2025-2026"
+        id: "d7", subject: "Дискретная математика", status: "today",
+        date: "2026-11-18", time: "09:00 - 12:30", room: "Ауд. 112/1 (РСР) / 27.11 ауд. 707/1 (ИКСС)",
+        dept: "Кафедра высшей математики",
+        datesList: ["18.11 09:00–12:30, ауд. 112/1 (ф-т РСР) ⬅️ СЕГОДНЯ", "27.11 09:00–12:30, ауд. 707/1 (ф-т ИКСС)"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/79.pdf"
     },
     {
-        id: "d3", subject: "Физика", status: "retake_set",
-        retakeDate: "2026-11-23", retakeTime: "12:30 - 14:45", retakeInfo: "Ауд. 311/1 (каф. физики)",
-        allDates: ["16.11 — 12:30–14:45, ауд. 311/1 ✅","23.11 — 12:30–14:45, ауд. 311/1","30.11 — 12:30–14:45, ауд. 311/1"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/82.pdf",
-        commission: "Зав. каф. Передистов Е.Ю., декан РСР Владыко А.Г.",
-        year: "2025-2026"
+        id: "d3", subject: "Физика", status: "soon",
+        date: "2026-11-23", time: "12:30 - 14:45", room: "Ауд. 311/1",
+        dept: "Кафедра физики",
+        datesList: ["16.11 (прошла) ✅", "23.11 12:30–14:45, ауд. 311/1", "30.11 12:30–14:45, ауд. 311/1"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/82.pdf"
     },
     {
-        id: "d4", subject: "Иностранный язык", status: "retake_set",
-        retakeDate: "2026-11-24", retakeTime: "16:30 - 19:00", retakeInfo: "Ауд. 317/2, тех. секция (каф. ИЯ)",
-        allDates: ["10.11 — 16:30–19:00, ауд. 317/2 ✅","17.11 — 16:30–19:00, ауд. 317/2 ✅","24.11 — 16:30–19:00, ауд. 317/2"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/42.pdf",
-        commission: "Зав. каф. ИнЯз Алешин А.С., декан СТЭД Шутман Д.В.",
-        year: "2025-2026"
+        id: "d6", subject: "Компоненты электронной техники (КЭТ)", status: "soon",
+        date: "2026-11-23", time: "12:30 - 16:30", room: "Ауд. 425/1",
+        dept: "Кафедра КПРЭС",
+        datesList: ["10.11 (прошла) ✅", "16.11 (прошла) ✅", "23.11 12:30–16:30, ауд. 425/1", "30.11 12:30–16:30, ауд. 425/1"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/72.pdf"
     },
     {
-        id: "d5", subject: "Организация и управление предприятиями", status: "retake_set",
-        retakeDate: "2026-11-24", retakeTime: "14:45 - 18:05", retakeInfo: "Ауд. 338/1 (каф. ЭД)",
-        allDates: ["10.11 — 14:45–18:05, ауд. 338/1 ✅","17.11 — 14:45–18:05, ауд. 338/1 ✅","24.11 — 14:45–18:05, ауд. 338/1"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/67.pdf",
-        commission: "Зав. каф. ЭД Калимуллина О.В., декан СТЭД Шутман Д.В.",
-        year: "2025-2026"
+        id: "d4", subject: "Иностранный язык", status: "soon",
+        date: "2026-11-24", time: "16:30 - 19:00", room: "Ауд. 317/2 (тех. секция)",
+        dept: "Кафедра иностранных языков",
+        datesList: ["10.11 (прошла) ✅", "17.11 (прошла) ✅", "24.11 16:30–19:00, ауд. 317/2"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/42.pdf"
     },
     {
-        id: "d6", subject: "Компоненты электронной техники (КЭТ)", status: "retake_set",
-        retakeDate: "2026-11-23", retakeTime: "12:30 - 16:30", retakeInfo: "Ауд. 425/1 (каф. КПРЭС)",
-        allDates: ["10.11 — 12:30–16:30, ауд. 425/1 ✅","16.11 — 12:30–16:30, ауд. 425/1 ✅","23.11 — 12:30–16:30, ауд. 425/1","30.11 — 12:30–16:30, ауд. 425/1"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/72.pdf",
-        commission: "Зав. каф. Адонин Л.С., декан РСР Владыко А.Г.",
-        year: "2025-2026"
+        id: "d5", subject: "Организация и управление предприятиями", status: "soon",
+        date: "2026-11-24", time: "14:45 - 18:05", room: "Ауд. 338/1",
+        dept: "Кафедра экономики данных",
+        datesList: ["10.11 (прошла) ✅", "17.11 (прошла) ✅", "24.11 14:45–18:05, ауд. 338/1"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/67.pdf"
     },
     {
-        id: "d7", subject: "Дискретная математика", status: "retake_set",
-        retakeDate: "2026-11-18", retakeTime: "09:00 - 12:30", retakeInfo: "Ауд. 112/1, ф-т РСР (каф. ВМ). Также: 27.11 ауд. 707/1 ф-т ИКСС",
-        allDates: ["18.11 — 09:00–12:30, ауд. 112/1 (РСР) ⬅️ СЕГОДНЯ","27.11 — 09:00–12:30, ауд. 707/1 (ИКСС)"],
-        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/79.pdf",
-        commission: "Зав. каф. Плотников П.В., декан ИТПИ Литвинов В.Л.",
-        year: "2025-2026"
+        id: "d2", subject: "Физическая культура", status: "soon",
+        date: "2026-11-27", time: "09:00 - 15:00", room: "СК «Динамит»",
+        dept: "Кафедра физической культуры",
+        datesList: ["12.11 (прошла) ✅", "16.11 (прошла) ✅", "27.11 09:00–15:00, СК «Динамит»"],
+        pdf: "https://www.sut.ru/doci/umu/peresdacha/2/75.pdf"
     }
 ];
 
-// ========== STORAGE ==========
-let currentTab='home', selectedDay=new Date().getDay()||1, currentWeekType=1, hwFilter='all';
+// ==================== STATE ====================
+let currentTab = 'schedule';
+let selectedDow = new Date().getDay(); // 0=Sun..6=Sat
+if (selectedDow === 0) selectedDow = 1;
+let currentWeekType = getAutoWeekType();
+let weekOffset = 0; // 0 = current week, +1 next, -1 prev
 
-const DEFAULT_RETAKES = [
-    { id:"r1", debtId:"d7", subject:"Дискретная математика", date:"2026-11-18", info:"09:00–12:30 · Ауд. 112/1 (ф-т РСР)" },
-    { id:"r2", debtId:"d1", subject:"ФОЭ", date:"2026-11-19", info:"10:45–14:00 · Ауд. 306/1" },
-    { id:"r3", debtId:"d3", subject:"Физика", date:"2026-11-23", info:"12:30–14:45 · Ауд. 311/1" },
-    { id:"r4", debtId:"d6", subject:"КЭТ", date:"2026-11-23", info:"12:30–16:30 · Ауд. 425/1" },
-    { id:"r5", debtId:"d4", subject:"Иностранный язык", date:"2026-11-24", info:"16:30–19:00 · Ауд. 317/2 (тех. секция)" },
-    { id:"r6", debtId:"d5", subject:"Организация и управление предприятиями", date:"2026-11-24", info:"14:45–18:05 · Ауд. 338/1" },
-    { id:"r7", debtId:"d1", subject:"ФОЭ (повтор)", date:"2026-11-26", info:"10:45–14:00 · Ауд. 306/1" },
-    { id:"r8", debtId:"d2", subject:"Физическая культура", date:"2026-11-27", info:"09:00–15:00 · СК «Динамит»" },
-    { id:"r9", debtId:"d7", subject:"Дискретная математика", date:"2026-11-27", info:"09:00–12:30 · Ауд. 707/1 (ф-т ИКСС)" },
-    { id:"r10", debtId:"d3", subject:"Физика (повтор)", date:"2026-11-30", info:"12:30–14:45 · Ауд. 311/1" },
-    { id:"r11", debtId:"d6", subject:"КЭТ (повтор)", date:"2026-11-30", info:"12:30–16:30 · Ауд. 425/1" }
-];
-
-function getSchedule(){ const s=localStorage.getItem('study_schedule_v2'); return s?JSON.parse(s):DEFAULT_SCHEDULE; }
-function saveSchedule(d){ localStorage.setItem('study_schedule_v2',JSON.stringify(d)); }
-function getHomeworks(){ const s=localStorage.getItem('study_homeworks'); return s?JSON.parse(s):[]; }
-function saveHomeworks(d){ localStorage.setItem('study_homeworks',JSON.stringify(d)); }
-function getRetakes(){ const s=localStorage.getItem('study_retakes'); return s?JSON.parse(s):DEFAULT_RETAKES; }
-function saveRetakes(d){ localStorage.setItem('study_retakes',JSON.stringify(d)); }
-function getDebts(){ const s=localStorage.getItem('study_debts'); return s?JSON.parse(s):DEFAULT_DEBTS; }
-function saveDebts(d){ localStorage.setItem('study_debts',JSON.stringify(d)); }
-
-function getAutoWeekType(){ const n=new Date(),s=new Date(n.getFullYear(),0,1),d=(n-s+((s.getTimezoneOffset()-n.getTimezoneOffset())*60000))/864e5; return Math.ceil((d+s.getDay()+1)/7)%2===1?1:2; }
-
-// ========== NAV ==========
-function switchTab(tab){
-    currentTab=tab;
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById('page-'+tab).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    const navBtn=document.querySelector(`[data-tab="${tab}"]`);
-    if(navBtn) navBtn.classList.add('active');
-    const fab=document.getElementById('fab-btn');
-    fab.style.display=(tab==='homework'||tab==='retakes')?'flex':'none';
-    renderCurrentPage();
+function getAutoWeekType() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 1);
+    const diff = (now - start + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60000)) / 864e5;
+    const weekNum = Math.ceil((diff + start.getDay() + 1) / 7);
+    return (weekNum % 2 === 1) ? 1 : 2;
 }
 
-function renderCurrentPage(){
-    switch(currentTab){
-        case'home':renderHome();break;
-        case'schedule':renderSchedule();break;
-        case'homework':renderHomework();break;
-        case'session':renderSession();break;
-        case'retakes':renderRetakes();break;
-    }
+function getDebts() {
+    const s = localStorage.getItem('bonch_debts_v4');
+    return s ? JSON.parse(s) : DEFAULT_DEBTS;
 }
 
-// ========== HOME ==========
-function renderHome(){
-    const now=new Date(), h=now.getHours();
-    let g='Доброй ночи! 🌙';
-    if(h>=5&&h<12)g='Доброе утро! ☀️';else if(h>=12&&h<17)g='Добрый день! 🌤';else if(h>=17&&h<23)g='Добрый вечер! 🌆';
-    document.getElementById('greeting').textContent=g;
-    document.getElementById('today-label').textContent=`${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-    const aw=getAutoWeekType();
-    document.getElementById('week-type-label').textContent=aw===1?'📌 Нечётная неделя':'📌 Чётная неделя';
-
-    const sch=getSchedule(), dow=now.getDay();
-    const tl=(dow>=1&&dow<=6)?(sch[aw]&&sch[aw][dow]?sch[aw][dow]:[]):[];
-    document.getElementById('home-lessons-count').textContent=tl.length;
-    document.getElementById('home-today-lessons').innerHTML=tl.length?tl.map(renderLessonCard).join(''):'<div class="no-classes"><div class="emoji">🎉</div><div class="text">Сегодня пар нет!</div></div>';
-
-    const hws=getHomeworks().filter(h=>!h.done).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,3);
-    document.getElementById('home-hw-count').textContent=getHomeworks().filter(h=>!h.done).length;
-    document.getElementById('home-upcoming-hw').innerHTML=hws.length?hws.map(renderHWCard).join(''):'<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Нет активных ДЗ</div></div>';
-
-    const debts=getDebts().filter(d=>d.status!=='passed');
-    document.getElementById('home-debts-count').textContent=debts.length;
-    document.getElementById('home-debts-preview').innerHTML=debts.length?debts.slice(0,3).map(renderDebtCardMini).join('')+(debts.length>3?`<div style="text-align:center;margin-top:8px;"><button class="schedule-action-btn" onclick="switchTab('session')">Показать все (${debts.length})</button></div>`:''):'<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">Долгов нет!</div></div>';
-
-    document.getElementById('home-retake-count').textContent=getRetakes().length;
+function saveDebts(data) {
+    localStorage.setItem('bonch_debts_v4', JSON.stringify(data));
 }
 
-function renderDebtCardMini(d){
-    const statusLabels={not_passed:'❌ Не сдано',retake_set:'📅 Назначена пересдача',passed:'✅ Сдано'};
-    const statusClass={not_passed:'not-passed',retake_set:'retake-set',passed:'passed'};
-    return `<div class="debt-card ${d.status==='retake_set'?'has-retake':''} ${d.status==='passed'?'passed':''}">
-        <div class="debt-header">
-            <div class="debt-subject">${d.subject}</div>
-            <div class="debt-status ${statusClass[d.status]}">${statusLabels[d.status]}</div>
-        </div>
-        ${d.retakeDate?`<div class="debt-details"><div class="detail-row">📆 ${formatDate(d.retakeDate)}</div>${d.retakeInfo?`<div class="detail-row">📍 ${d.retakeInfo}</div>`:''}</div>`:''}
-    </div>`;
+function getHWs() {
+    const s = localStorage.getItem('bonch_hw_v4');
+    return s ? JSON.parse(s) : [];
 }
 
-// ========== SCHEDULE ==========
-function setWeekType(t){ currentWeekType=t; document.getElementById('week-btn-1').classList.toggle('active',t===1); document.getElementById('week-btn-2').classList.toggle('active',t===2); renderSchedule(); }
-
-function renderSchedule(){
-    const now=new Date(), aw=getAutoWeekType();
-    document.getElementById('auto-badge-1').style.display=aw===1?'inline':'none';
-    document.getElementById('auto-badge-2').style.display=aw===2?'inline':'none';
-
-    const ws=new Date(now); ws.setDate(now.getDate()-(now.getDay()===0?6:now.getDay()-1));
-    let sh='';
-    for(let i=0;i<6;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dw=d.getDay();sh+=`<button class="day-btn ${(i+1)===selectedDay?'active':''} ${d.toDateString()===now.toDateString()?'today':''}" onclick="selectDay(${i+1})"><span>${DAYS_SHORT[dw]}</span><span class="day-num">${d.getDate()}</span></button>`;}
-    document.getElementById('day-selector').innerHTML=sh;
-
-    const sd=new Date(ws);sd.setDate(ws.getDate()+selectedDay-1);
-    document.getElementById('schedule-date-label').innerHTML=`<span class="cal-icon">📆</span> ${DAYS[sd.getDay()]}, ${sd.getDate()} ${MONTHS[sd.getMonth()]}`;
-
-    const sch=getSchedule(), les=sch[currentWeekType]&&sch[currentWeekType][selectedDay]?sch[currentWeekType][selectedDay]:[];
-    const noMsg=selectedDay===5?'<div class="no-classes"><div class="emoji">📖</div><div class="text">День самостоятельной работы</div></div>':'<div class="no-classes"><div class="emoji">😴</div><div class="text">В этот день пар нет</div></div>';
-    document.getElementById('schedule-lessons').innerHTML=les.length?les.map(renderLessonCard).join(''):noMsg;
+function saveHWs(data) {
+    localStorage.setItem('bonch_hw_v4', JSON.stringify(data));
 }
 
-function selectDay(d){ selectedDay=d; renderSchedule(); }
+// ==================== NAVIGATION ====================
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const targetPage = document.getElementById('page-' + tab);
+    if (targetPage) targetPage.classList.add('active');
 
-function renderLessonCard(l){
-    const tl={lecture:'Лекция',seminar:'Семинар',lab:'Лаб. работа',practice:'Практ. занятие'};
-    return `<div class="lesson-card ${l.type}"><div class="lesson-num">${l.num}</div><div class="lesson-info"><div class="lesson-type-time"><span class="lesson-type">${tl[l.type]||l.type}</span><span class="lesson-time">${l.time}</span></div><div class="lesson-name">${l.name}</div><div class="lesson-room">📍 ${l.room}</div>${l.teacher?`<div class="lesson-teacher">👤 ${l.teacher}</div>`:''}${l.note?`<div class="lesson-note">⚠️ ${l.note}</div>`:''}</div></div>`;
-}
+    document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
 
-// ========== HOMEWORK ==========
-function filterHW(f,btn){ hwFilter=f; document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active')); if(btn)btn.classList.add('active'); renderHomework(); }
+    // Hide calendar strip and summary when not in schedule
+    const stripWrap = document.getElementById('calendar-strip-wrap');
+    const summaryBar = document.getElementById('summary-bar');
+    const fabToday = document.getElementById('fab-today');
 
-function renderHomework(){
-    let hws=getHomeworks(); const now=new Date();now.setHours(0,0,0,0);
-    if(hwFilter==='active')hws=hws.filter(h=>!h.done);else if(hwFilter==='done')hws=hws.filter(h=>h.done);else if(hwFilter==='overdue')hws=hws.filter(h=>!h.done&&new Date(h.deadline)<now);
-    hws.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
-    document.getElementById('hw-list').innerHTML=hws.length?hws.map(renderHWCard).join(''):'<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">Нет заданий</div></div>';
-}
-
-function renderHWCard(hw){
-    const now=new Date();now.setHours(0,0,0,0);const dl=new Date(hw.deadline);dl.setHours(0,0,0,0);const diff=Math.ceil((dl-now)/864e5);
-    let dc='ok',dt='';
-    if(hw.done){dc='ok';dt='✅ Выполнено';}else if(diff<0){dc='overdue';dt=`Просрочено ${Math.abs(diff)} дн.`;}else if(diff===0){dc='overdue';dt='Сегодня!';}else if(diff<=3){dc='soon';dt=`Через ${diff} дн.`;}else{dt=`${dl.getDate()} ${MONTHS[dl.getMonth()]}`;}
-    return `<div class="hw-card ${hw.done?'hw-done-card':''}"><div class="hw-header"><div class="hw-subject">${hw.subject}</div><div class="hw-deadline ${dc}">${dt}</div></div><div class="hw-text">${hw.text}</div><div class="hw-footer"><div class="hw-status" onclick="toggleHW('${hw.id}')"><div class="hw-check ${hw.done?'done':''}">${hw.done?'✓':''}</div><span>${hw.done?'Выполнено':'Отметить'}</span></div><button class="hw-delete" onclick="deleteHW('${hw.id}')">🗑</button></div></div>`;
-}
-
-function toggleHW(id){ const hws=getHomeworks(),h=hws.find(x=>x.id===id);if(h){h.done=!h.done;saveHomeworks(hws);renderCurrentPage();} }
-function deleteHW(id){ if(!confirm('Удалить?'))return;saveHomeworks(getHomeworks().filter(h=>h.id!==id));renderCurrentPage(); }
-
-// ========== SESSION / DEBTS ==========
-function renderSession(){
-    const debts=getDebts();
-    const notPassed=debts.filter(d=>d.status==='not_passed').length;
-    const retakeSet=debts.filter(d=>d.status==='retake_set').length;
-    const passed=debts.filter(d=>d.status==='passed').length;
-
-    document.getElementById('debt-total').textContent=notPassed+retakeSet;
-    document.getElementById('debt-retake').textContent=retakeSet;
-    document.getElementById('debt-done').textContent=passed;
-
-    const sorted=[...debts.filter(d=>d.status==='retake_set'),...debts.filter(d=>d.status==='not_passed'),...debts.filter(d=>d.status==='passed')];
-    document.getElementById('debts-list').innerHTML=sorted.map(renderDebtCard).join('');
-}
-
-function renderDebtCard(d){
-    const statusLabels={not_passed:'❌ Не сдано',retake_set:'📅 Пересдача назначена',passed:'✅ Сдано'};
-    const statusClass={not_passed:'not-passed',retake_set:'retake-set',passed:'passed'};
-
-    let detailsHtml='';
-    if(d.retakeDate){
-        const rd=new Date(d.retakeDate);
-        const now=new Date();now.setHours(0,0,0,0);rd.setHours(0,0,0,0);
-        const diff=Math.ceil((rd-now)/864e5);
-        let countdown=diff<0?'Прошла — см. другие даты':diff===0?'🔴 СЕГОДНЯ!':`Через ${diff} дн.`;
-        let countdownColor=diff<=0?'var(--danger)':diff<=2?'var(--warning)':'var(--success)';
-        detailsHtml=`<div class="debt-details">
-            <div class="detail-row" style="font-weight:600;">📆 Ближайшая: ${formatDate(d.retakeDate)} <span style="margin-left:8px;font-size:12px;font-weight:700;color:${countdownColor};">${countdown}</span></div>
-            ${d.retakeTime?`<div class="detail-row">🕐 ${d.retakeTime}</div>`:''}
-            ${d.retakeInfo?`<div class="detail-row">📍 ${d.retakeInfo}</div>`:''}
-            ${d.commission?`<div class="detail-row" style="font-size:11px;color:var(--text-light);">👥 ${d.commission}</div>`:''}
-        </div>`;
-    }
-
-    // Show all dates
-    let allDatesHtml='';
-    if(d.allDates&&d.allDates.length>0){
-        allDatesHtml=`<div style="margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:12px;line-height:1.8;">
-            <div style="font-weight:600;margin-bottom:4px;color:var(--text-secondary);">📋 Все даты комиссий:</div>
-            ${d.allDates.map(dt=>`<div style="color:${dt.includes('✅')?'var(--text-light)':dt.includes('СЕГОДНЯ')?'var(--danger)':'var(--text)'};">${dt}</div>`).join('')}
-            ${d.pdfUrl?`<div style="margin-top:4px;"><a href="${d.pdfUrl}" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:600;">📄 Скачать расписание PDF</a></div>`:''}
-        </div>`;
-    }
-
-    let actionsHtml='';
-    if(d.status!=='passed'){
-        actionsHtml=`<div class="debt-actions"><button class="debt-btn pass" onclick="passDebt('${d.id}')">✅ Сдал</button><button class="debt-btn edit" onclick="editDebtRetake('${d.id}')">📅 Изменить</button></div>`;
+    if (tab === 'schedule') {
+        stripWrap.style.display = 'flex';
+        summaryBar.style.display = 'flex';
+        fabToday.style.display = 'flex';
+        renderScheduleTimeline();
     } else {
-        actionsHtml=`<div class="debt-actions"><button class="debt-btn unpass" onclick="unpassDebt('${d.id}')">↩️ Не сдал</button></div>`;
+        stripWrap.style.display = 'none';
+        summaryBar.style.display = 'none';
+        fabToday.style.display = 'none';
+        if (tab === 'session') renderSession();
+        else if (tab === 'homework') renderHomework();
+        else if (tab === 'retakes') renderRetakes();
+    }
+}
+
+// ==================== CALENDAR STRIP & DATES ====================
+function getMonday(d) {
+    d = new Date(d);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
+
+function renderCalendarStrip() {
+    const now = new Date();
+    const baseDate = new Date();
+    baseDate.setDate(now.getDate() + (weekOffset * 7));
+    const monday = getMonday(baseDate);
+
+    // Update Header Date Range (e.g. 23 ноября – 28 ноября)
+    const saturday = new Date(monday);
+    saturday.setDate(monday.getDate() + 5);
+    document.getElementById('header-date-range').textContent = 
+        `${monday.getDate()} ${MONTHS_NAMES[monday.getMonth()]} – ${saturday.getDate()} ${MONTHS_NAMES[saturday.getMonth()]}`;
+
+    let html = '';
+    for (let i = 0; i < 6; i++) {
+        const dayDate = new Date(monday);
+        dayDate.setDate(monday.getDate() + i);
+        const dow = i + 1; // 1=Mon..6=Sat
+        const isActive = (dow === selectedDow);
+
+        // Calculate lesson stripes for this day
+        const lessons = SCHEDULE_DATA[currentWeekType][dow] || [];
+        let stripesHtml = '';
+        if (lessons.length > 0) {
+            stripesHtml = lessons.map(l => {
+                let colorClass = 'blue';
+                if (l.type === 'pe') colorClass = 'green';
+                else if (l.type === 'lab') colorClass = 'yellow';
+                else if (l.type === 'practice') colorClass = 'orange';
+                return `<div class="dp-stripe ${colorClass}"></div>`;
+            }).slice(0, 4).join('');
+        }
+
+        const dateStr = `${dayDate.getDate()}.${String(dayDate.getMonth()+1).padStart(2,'0')}`;
+
+        html += `
+            <div class="day-pill ${isActive ? 'active' : ''}" onclick="selectDay(${dow})">
+                <span class="dp-dow">${DAYS_SHORT[dow]}</span>
+                <span class="dp-date">${dateStr}</span>
+                <div class="dp-stripes">${stripesHtml}</div>
+            </div>
+        `;
     }
 
-    return `<div class="debt-card ${d.status==='retake_set'?'has-retake':''} ${d.status==='passed'?'passed':''}">
-        <div class="debt-header"><div class="debt-subject">${d.subject}</div><div class="debt-status ${statusClass[d.status]}">${statusLabels[d.status]}</div></div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📎 ${d.year}</div>
-        ${detailsHtml}
-        ${allDatesHtml}
-        ${actionsHtml}
-    </div>`;
+    document.getElementById('calendar-strip').innerHTML = html;
 }
 
-function passDebt(id){ const ds=getDebts(),d=ds.find(x=>x.id===id);if(d){d.status='passed';saveDebts(ds);renderCurrentPage();} }
-function unpassDebt(id){ const ds=getDebts(),d=ds.find(x=>x.id===id);if(d){d.status='not_passed';d.retakeDate='';d.retakeInfo='';saveDebts(ds);renderCurrentPage();} }
-
-function editDebtRetake(id){
-    const ds=getDebts(),d=ds.find(x=>x.id===id);if(!d)return;
-    document.getElementById('modal-content').innerHTML=`
-        <div class="modal-title">📅 Назначить пересдачу</div>
-        <div style="font-weight:600;margin-bottom:12px;">${d.subject}</div>
-        <div class="form-group"><label class="form-label">Дата</label><input class="form-input" type="date" id="retake-d-date" value="${d.retakeDate||''}"></div>
-        <div class="form-group"><label class="form-label">Время</label><input class="form-input" id="retake-d-time" placeholder="10:00" value="${d.retakeTime||''}"></div>
-        <div class="form-group"><label class="form-label">Аудитория / Инфо</label><input class="form-input" id="retake-d-info" placeholder="Ауд. 301, Б22/1" value="${d.retakeInfo||''}"></div>
-        <button class="form-btn" onclick="saveDebtRetake('${id}')">Сохранить</button>`;
-    showModal();
+function selectDay(dow) {
+    selectedDow = dow;
+    renderCalendarStrip();
+    renderScheduleTimeline();
 }
 
-function saveDebtRetake(id){
-    const ds=getDebts(),d=ds.find(x=>x.id===id);if(!d)return;
-    const date=document.getElementById('retake-d-date').value;
-    const time=document.getElementById('retake-d-time').value.trim();
-    const info=document.getElementById('retake-d-info').value.trim();
-    if(!date){alert('Укажите дату');return;}
-    d.status='retake_set';d.retakeDate=date;d.retakeTime=time;d.retakeInfo=info;
-    saveDebts(ds);
-
-    // Also add to retakes list
-    const retakes=getRetakes();
-    if(!retakes.find(r=>r.debtId===id)){
-        retakes.push({id:Date.now().toString(),debtId:id,subject:d.subject,date,info:`${time?time+' · ':''}${info}`});
-        saveRetakes(retakes);
+function navDay(direction) {
+    selectedDow += direction;
+    if (selectedDow > 6) {
+        selectedDow = 1;
+        weekOffset += 1;
+        currentWeekType = currentWeekType === 1 ? 2 : 1;
+    } else if (selectedDow < 1) {
+        selectedDow = 6;
+        weekOffset -= 1;
+        currentWeekType = currentWeekType === 1 ? 2 : 1;
     }
-    closeModalForce();renderCurrentPage();
+    updateWeekToggleButton();
+    renderCalendarStrip();
+    renderScheduleTimeline();
 }
 
-function openAddDebtModal(){
-    document.getElementById('modal-content').innerHTML=`
-        <div class="modal-title">➕ Добавить долг</div>
-        <div class="form-group"><label class="form-label">Предмет</label><input class="form-input" id="new-debt-subj" placeholder="Название предмета"></div>
-        <div class="form-group"><label class="form-label">Учебный год</label><input class="form-input" id="new-debt-year" value="2025-2026" placeholder="2025-2026"></div>
-        <button class="form-btn" onclick="addDebt()">Добавить</button>`;
+function toggleWeekType(btn) {
+    currentWeekType = currentWeekType === 1 ? 2 : 1;
+    updateWeekToggleButton();
+    renderCalendarStrip();
+    renderScheduleTimeline();
+}
+
+function updateWeekToggleButton() {
+    const btn = document.getElementById('btn-week-toggle');
+    btn.textContent = currentWeekType === 1 ? 'Нечётная' : 'Чётная';
+}
+
+function goToToday() {
+    const now = new Date();
+    weekOffset = 0;
+    selectedDow = now.getDay() === 0 ? 1 : now.getDay();
+    currentWeekType = getAutoWeekType();
+    updateWeekToggleButton();
+    renderCalendarStrip();
+    renderScheduleTimeline();
+}
+
+function setViewMode(mode, btn) {
+    document.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (mode === 'list') {
+        renderAllWeekList();
+    } else {
+        renderScheduleTimeline();
+    }
+}
+
+// ==================== TIMELINE RENDERING ====================
+function renderScheduleTimeline() {
+    const lessons = (SCHEDULE_DATA[currentWeekType] && SCHEDULE_DATA[currentWeekType][selectedDow]) || [];
+
+    // Summary calculation (Лекций X · Практик Y)
+    let lecs = 0, practices = 0, labs = 0;
+    lessons.forEach(l => {
+        if (l.type === 'lecture') lecs++;
+        else if (l.type === 'practice' || l.type === 'pe') practices++;
+        else if (l.type === 'lab') labs++;
+    });
+
+    const summaryParts = [];
+    if (lecs > 0) summaryParts.push(`Лекций ${lecs}`);
+    if (practices > 0) summaryParts.push(`Практик ${practices}`);
+    if (labs > 0) summaryParts.push(`Лабораторных ${labs}`);
+
+    document.getElementById('summary-text').textContent = 
+        summaryParts.length > 0 ? summaryParts.join(' · ') : (selectedDow === 5 ? 'День самостоятельной работы' : 'Занятий нет');
+
+    if (lessons.length === 0) {
+        const msg = selectedDow === 5 ? '📖 День самостоятельной работы' : '🎉 В этот день пар нет!';
+        document.getElementById('timeline-list').innerHTML = `
+            <div class="empty-box">
+                <div class="icon">😴</div>
+                <div style="font-size: 15px; font-weight: 600;">${msg}</div>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    lessons.forEach((l, index) => {
+        let badgeColor = 'blue';
+        let pillColor = 'blue';
+        let isPE = false;
+
+        if (l.type === 'pe') {
+            badgeColor = 'green';
+            pillColor = 'green';
+            isPE = true;
+        } else if (l.type === 'lab') {
+            badgeColor = 'yellow';
+            pillColor = 'yellow';
+        } else if (l.type === 'practice') {
+            badgeColor = 'orange';
+            pillColor = 'orange';
+        }
+
+        html += `
+            <div class="timeline-row">
+                <div class="timeline-indicator">
+                    <div class="time-badge ${badgeColor}">${l.num}</div>
+                    <div class="time-start">${l.timeStart}</div>
+                    <div class="time-line ${badgeColor}"></div>
+                    <div class="time-end">${l.timeEnd}</div>
+                </div>
+                <div class="lesson-card-bonch ${isPE ? 'pe' : ''}">
+                    <div class="card-top-row">
+                        <span class="type-pill ${pillColor}">${l.typeLabel}</span>
+                        <span class="card-counter">${l.counter || ''}</span>
+                    </div>
+                    <div class="card-title">${l.name}</div>
+                    <div class="card-info-row">
+                        <div class="card-info-item">
+                            <span>👤</span>
+                            <span>${l.teacher}</span>
+                        </div>
+                        <span class="card-arrow">❯</span>
+                    </div>
+                    <div class="card-info-row">
+                        <div class="card-info-item">
+                            <span>📍</span>
+                            <span>${l.room}</span>
+                        </div>
+                        <span class="card-arrow">❯</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('timeline-list').innerHTML = html;
+}
+
+function renderAllWeekList() {
+    let html = '';
+    for (let dow = 1; dow <= 6; dow++) {
+        const lessons = (SCHEDULE_DATA[currentWeekType] && SCHEDULE_DATA[currentWeekType][dow]) || [];
+        html += `<div style="font-size: 15px; font-weight: 800; color: var(--orange); margin: 16px 0 8px;">${DAYS_NAMES[dow]}</div>`;
+        if (lessons.length === 0) {
+            html += `<div style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;">Пар нет</div>`;
+        } else {
+            lessons.forEach(l => {
+                html += `
+                    <div class="lesson-card-bonch" style="margin-bottom: 8px;">
+                        <div class="card-top-row">
+                            <span class="type-pill blue">${l.typeLabel} · ${l.timeStart}–${l.timeEnd}</span>
+                            <span class="card-counter">Ауд. ${l.room}</span>
+                        </div>
+                        <div class="card-title" style="font-size: 14px;">${l.name}</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">👤 ${l.teacher}</div>
+                    </div>
+                `;
+            });
+        }
+    }
+    document.getElementById('timeline-list').innerHTML = html;
+}
+
+// ==================== SESSION / DEBTS ====================
+function renderSession() {
+    const debts = getDebts();
+    const now = new Date();
+    now.setHours(0,0,0,0);
+
+    let html = '';
+    debts.forEach(d => {
+        const rd = new Date(d.date);
+        rd.setHours(0,0,0,0);
+        const diff = Math.ceil((rd - now) / 864e5);
+
+        let statusText = '';
+        let tagClass = 'soon';
+        if (d.passed) {
+            statusText = '✅ Сдано';
+            tagClass = 'done';
+        } else if (diff < 0) {
+            statusText = 'Прошла';
+            tagClass = 'soon';
+        } else if (diff === 0) {
+            statusText = '🚨 СЕГОДНЯ!';
+            tagClass = 'urgent';
+        } else if (diff === 1) {
+            statusText = '⚠️ ЗАВТРА!';
+            tagClass = 'urgent';
+        } else {
+            statusText = `через ${diff} дн.`;
+            tagClass = 'soon';
+        }
+
+        html += `
+            <div class="debt-item-bonch ${d.passed ? 'passed' : ''}">
+                <div class="debt-top">
+                    <div class="debt-name">${d.subject}</div>
+                    <span class="debt-status-tag ${tagClass}">${statusText}</span>
+                </div>
+                <div class="debt-meta">
+                    <div class="debt-meta-row">🏛 ${d.dept || 'СПбГУТ'}</div>
+                    <div class="debt-meta-row">📆 Ближайшая: <b style="color:#FFF; margin-left:4px;">${formatDateStr(d.date)} (${d.time})</b></div>
+                    <div class="debt-meta-row">📍 ${d.room}</div>
+                </div>
+                ${d.datesList ? `
+                    <div class="dates-box">
+                        <div style="font-weight:700; color:var(--text-secondary); margin-bottom:4px;">📋 Все даты комиссий:</div>
+                        ${d.datesList.map(dt => `<div>• ${dt}</div>`).join('')}
+                        ${d.pdf ? `<div><a href="${d.pdf}" target="_blank" class="pdf-link">📄 Скачать расписание PDF ↗</a></div>` : ''}
+                    </div>
+                ` : ''}
+                <div class="debt-actions-row">
+                    <button class="btn-bonch ${d.passed ? 'outline' : 'success'}" onclick="toggleDebtPass('${d.id}')">
+                        ${d.passed ? '↩️ Отменить сдачу' : '✅ Отметить как сданное'}
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    document.getElementById('debts-container').innerHTML = html;
+}
+
+function toggleDebtPass(id) {
+    const debts = getDebts();
+    const d = debts.find(x => x.id === id);
+    if (d) {
+        d.passed = !d.passed;
+        saveDebts(debts);
+        renderSession();
+    }
+}
+
+function formatDateStr(ds) {
+    if (!ds) return '';
+    const d = new Date(ds);
+    return `${d.getDate()} ${MONTHS_NAMES[d.getMonth()]}`;
+}
+
+// ==================== RETAKES TAB ====================
+function renderRetakes() {
+    const debts = getDebts();
+    let retakes = [];
+    debts.forEach(d => {
+        if (!d.passed && d.datesList) {
+            d.datesList.forEach(dt => {
+                if (!dt.includes('✅')) {
+                    retakes.push({ subject: d.subject, text: dt, pdf: d.pdf });
+                }
+            });
+        }
+    });
+
+    let html = retakes.map(r => `
+        <div class="lesson-card-bonch" style="margin-bottom: 10px;">
+            <div class="card-top-row">
+                <span class="type-pill orange">Комиссия</span>
+                ${r.pdf ? `<a href="${r.pdf}" target="_blank" style="font-size:11px; color:var(--orange); text-decoration:none; font-weight:700;">PDF ↗</a>` : ''}
+            </div>
+            <div class="card-title">${r.subject}</div>
+            <div style="font-size: 13px; color: #FFFFFF; font-weight: 600; margin-top: 4px;">📅 ${r.text}</div>
+        </div>
+    `).join('');
+
+    document.getElementById('retakes-container').innerHTML = html || '<div class="empty-box"><div class="icon">🎓</div><div>Все долги закрыты!</div></div>';
+}
+
+// ==================== HOMEWORK ====================
+function renderHomework() {
+    const hws = getHWs();
+    if (hws.length === 0) {
+        document.getElementById('hw-container').innerHTML = `
+            <div class="empty-box">
+                <div class="icon">📝</div>
+                <div>Заданий пока нет</div>
+            </div>
+        `;
+        return;
+    }
+
+    let html = hws.map(h => `
+        <div class="lesson-card-bonch" style="margin-bottom: 10px;">
+            <div class="card-top-row">
+                <span class="type-pill blue">${h.subject}</span>
+                <span style="font-size: 11px; color: var(--orange); font-weight: 700;">Дедлайн: ${h.deadline}</span>
+            </div>
+            <div style="font-size: 14px; color: #FFFFFF; margin: 6px 0;">${h.text}</div>
+            <button class="btn-bonch outline" style="padding: 4px 10px; font-size: 11px;" onclick="deleteHW('${h.id}')">Удалить</button>
+        </div>
+    `).join('');
+
+    document.getElementById('hw-container').innerHTML = html;
+}
+
+function openAddHWModal() {
+    document.getElementById('modal-content').innerHTML = `
+        <div class="modal-title">📝 Новое задание</div>
+        <div class="form-group">
+            <label class="form-label">Предмет</label>
+            <input class="form-input" id="new-hw-subj" placeholder="Например: Технологии программирования">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea class="form-textarea" id="new-hw-text" rows="3" placeholder="Что нужно сделать..."></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Дедлайн</label>
+            <input class="form-input" type="date" id="new-hw-date">
+        </div>
+        <button class="form-btn-submit" onclick="submitHW()">Добавить</button>
+    `;
     showModal();
 }
 
-function addDebt(){
-    const subj=document.getElementById('new-debt-subj').value.trim();
-    const year=document.getElementById('new-debt-year').value.trim();
-    if(!subj){alert('Укажите предмет');return;}
-    const ds=getDebts();
-    ds.push({id:'d'+Date.now(),subject:subj,status:'not_passed',retakeDate:'',retakeInfo:'',year:year||'2025-2026'});
-    saveDebts(ds);closeModalForce();renderCurrentPage();
+function submitHW() {
+    const subj = document.getElementById('new-hw-subj').value.trim();
+    const text = document.getElementById('new-hw-text').value.trim();
+    const date = document.getElementById('new-hw-date').value;
+    if (!subj || !text) { alert('Заполните предмет и текст'); return; }
+
+    const hws = getHWs();
+    hws.push({ id: Date.now().toString(), subject: subj, text, deadline: date });
+    saveHWs(hws);
+    closeModalForce();
+    renderHomework();
 }
 
-// ========== RETAKES ==========
-function renderRetakes(){
-    const retakes=getRetakes().sort((a,b)=>new Date(a.date)-new Date(b.date));
-    document.getElementById('retakes-list').innerHTML=retakes.length?retakes.map(renderRetakeCard).join(''):'<div class="empty-state"><div class="empty-icon">🎓</div><div class="empty-text">Пересдач не назначено<br><small style="color:var(--text-light)">Добавьте через вкладку «Сессия»</small></div></div>';
+function deleteHW(id) {
+    saveHWs(getHWs().filter(h => h.id !== id));
+    renderHomework();
 }
 
-function renderRetakeCard(r){
-    const now=new Date();now.setHours(0,0,0,0);const d=new Date(r.date);d.setHours(0,0,0,0);const diff=Math.ceil((d-now)/864e5);
-    const dt=diff<0?'Прошла':diff===0?'Сегодня!':`Через ${diff} дн.`;
-    return `<div class="retake-card"><div class="retake-header"><div class="retake-subject">${r.subject}</div><div class="retake-date">${d.getDate()} ${MONTHS[d.getMonth()]}</div></div><div class="retake-info">${r.info||''}</div><div class="retake-footer"><span class="retake-days-left">${dt}</span><button class="retake-delete" onclick="deleteRetake('${r.id}')">🗑</button></div></div>`;
+// ==================== CACHE RESET ====================
+function resetCache() {
+    if (confirm('Сбросить сохранённые данные и загрузить свежее расписание Bonch Go?')) {
+        localStorage.clear();
+        location.reload(true);
+    }
 }
 
-function deleteRetake(id){if(!confirm('Удалить?'))return;saveRetakes(getRetakes().filter(r=>r.id!==id));renderCurrentPage();}
-
-// ========== MODALS ==========
-function openAddModal(){if(currentTab==='homework')openAddHWModal();else if(currentTab==='retakes')openAddRetakeModal();}
-
-function openAddHWModal(){
-    const opts=getSubjectsList().map(s=>`<option value="${s}">${s}</option>`).join('');
-    document.getElementById('modal-content').innerHTML=`<div class="modal-title">📝 Новое ДЗ</div><div class="form-group"><label class="form-label">Предмет</label><select class="form-select" id="hw-subject" onchange="document.getElementById('hw-cw').style.display=this.value==='__custom'?'block':'none'"><option value="">Выберите</option>${opts}<option value="__custom">Другой...</option></select></div><div class="form-group" id="hw-cw" style="display:none"><label class="form-label">Название</label><input class="form-input" id="hw-cs" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Задание</label><textarea class="form-textarea" id="hw-text" placeholder="Опишите..."></textarea></div><div class="form-group"><label class="form-label">Дедлайн</label><input class="form-input" type="date" id="hw-dl"></div><button class="form-btn" onclick="addHW()">Добавить</button>`;
-    showModal();
+// ==================== MODAL UTILS ====================
+function showModal() {
+    document.getElementById('modal-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
 }
 
-function openAddRetakeModal(){
-    const opts=getSubjectsList().map(s=>`<option value="${s}">${s}</option>`).join('');
-    document.getElementById('modal-content').innerHTML=`<div class="modal-title">🔄 Новая пересдача</div><div class="form-group"><label class="form-label">Предмет</label><select class="form-select" id="rt-subj" onchange="document.getElementById('rt-cw').style.display=this.value==='__custom'?'block':'none'"><option value="">Выберите</option>${opts}<option value="__custom">Другой...</option></select></div><div class="form-group" id="rt-cw" style="display:none"><label class="form-label">Название</label><input class="form-input" id="rt-cs" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Дата</label><input class="form-input" type="date" id="rt-date"></div><div class="form-group"><label class="form-label">Дополнительно</label><textarea class="form-textarea" id="rt-info" placeholder="Кабинет, время..."></textarea></div><button class="form-btn" onclick="addRetake()">Добавить</button>`;
-    showModal();
+function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModalForce();
 }
 
-function openEditScheduleModal(){
-    const sch=getSchedule(),les=sch[currentWeekType]&&sch[currentWeekType][selectedDay]?sch[currentWeekType][selectedDay]:[];
-    const dn=DAYS[selectedDay===7?0:selectedDay],wn=currentWeekType===1?'нечётная':'чётная';
-    let list=les.map((l,i)=>`<div class="card" style="padding:10px 12px;margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;font-size:14px;">${l.num}. ${l.name}</span><button class="hw-delete" onclick="removeLesson(${i})" style="font-size:16px;">✕</button></div><div style="font-size:12px;color:var(--text-secondary);">${l.time} · ${l.room}</div>${l.teacher?`<div style="font-size:11px;color:var(--text-light);">${l.teacher}</div>`:''}</div>`).join('');
-    if(!list)list='<div style="color:var(--text-light);text-align:center;padding:12px;">Нет пар</div>';
-    document.getElementById('modal-content').innerHTML=`<div class="modal-title">✏️ ${dn} (${wn})</div>${list}<div style="border-top:1px solid var(--border);margin:14px 0;padding-top:14px;"><div style="font-weight:600;margin-bottom:10px;">Добавить пару:</div><div class="form-group"><label class="form-label">Номер</label><input class="form-input" id="les-num" value="${les.length+1}"></div><div class="form-group"><label class="form-label">Название</label><input class="form-input" id="les-name" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Тип</label><select class="form-select" id="les-type"><option value="lecture">Лекция</option><option value="practice">Практика</option><option value="lab">Лаб. работа</option><option value="seminar">Семинар</option></select></div><div class="form-group"><label class="form-label">Время</label><input class="form-input" id="les-time" placeholder="09:00 - 10:35"></div><div class="form-group"><label class="form-label">Аудитория</label><input class="form-input" id="les-room" placeholder="Ауд. 301, Б22/1"></div><div class="form-group"><label class="form-label">Преподаватель</label><input class="form-input" id="les-teacher" placeholder="Иванов И.И."></div><button class="form-btn" onclick="addLesson()">Добавить</button></div>`;
-    showModal();
+function closeModalForce() {
+    document.getElementById('modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
 }
 
-function addLesson(){
-    const name=document.getElementById('les-name').value.trim(),num=document.getElementById('les-num').value.trim(),type=document.getElementById('les-type').value,time=document.getElementById('les-time').value.trim(),room=document.getElementById('les-room').value.trim(),teacher=document.getElementById('les-teacher').value.trim();
-    if(!name||!time){alert('Заполните название и время');return;}
-    const sch=getSchedule();if(!sch[currentWeekType])sch[currentWeekType]={};if(!sch[currentWeekType][selectedDay])sch[currentWeekType][selectedDay]=[];
-    sch[currentWeekType][selectedDay].push({num:isNaN(parseInt(num))?num:parseInt(num),type,name,time,room,teacher});
-    sch[currentWeekType][selectedDay].sort((a,b)=>(typeof a.num==='number'?a.num:99)-(typeof b.num==='number'?b.num:99));
-    saveSchedule(sch);closeModalForce();renderSchedule();
-}
+// ==================== TELEGRAM WEBAPP ====================
+try {
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        Telegram.WebApp.setHeaderColor('#0B0D11');
+        Telegram.WebApp.setBackgroundColor('#0B0D11');
+    }
+} catch(e) {}
 
-function removeLesson(i){if(!confirm('Удалить?'))return;const sch=getSchedule();sch[currentWeekType][selectedDay].splice(i,1);saveSchedule(sch);closeModalForce();renderSchedule();openEditScheduleModal();}
-
-function addHW(){
-    let s=document.getElementById('hw-subject').value;if(s==='__custom')s=document.getElementById('hw-cs').value.trim();
-    const t=document.getElementById('hw-text').value.trim(),dl=document.getElementById('hw-dl').value;
-    if(!s||!t||!dl){alert('Заполните все поля');return;}
-    const hws=getHomeworks();hws.push({id:Date.now().toString(),subject:s,text:t,deadline:dl,done:false});saveHomeworks(hws);closeModalForce();renderCurrentPage();
-}
-
-function addRetake(){
-    let s=document.getElementById('rt-subj').value;if(s==='__custom')s=document.getElementById('rt-cs').value.trim();
-    const d=document.getElementById('rt-date').value,info=document.getElementById('rt-info').value.trim();
-    if(!s||!d){alert('Заполните предмет и дату');return;}
-    const rs=getRetakes();rs.push({id:Date.now().toString(),subject:s,date:d,info});saveRetakes(rs);closeModalForce();renderCurrentPage();
-}
-
-function getSubjectsList(){
-    const sch=getSchedule(),subj=new Set();
-    for(const wt of Object.values(sch))for(const day of Object.values(wt))if(Array.isArray(day))day.forEach(l=>subj.add(l.name));
-    getDebts().forEach(d=>subj.add(d.subject));
-    return[...subj].sort();
-}
-
-function formatDate(ds){if(!ds)return'';const d=new Date(ds);return`${d.getDate()} ${MONTHS[d.getMonth()]}`;}
-
-// ========== MODAL UTILS ==========
-function showModal(){document.getElementById('modal-overlay').classList.add('show');document.body.style.overflow='hidden';}
-function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalForce();}
-function closeModalForce(){document.getElementById('modal-overlay').classList.remove('show');document.body.style.overflow='';}
-
-// ========== TELEGRAM ==========
-try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();const t=Telegram.WebApp.themeParams;if(t){if(t.secondary_bg_color)document.documentElement.style.setProperty('--bg',t.secondary_bg_color);if(t.section_bg_color)document.documentElement.style.setProperty('--card',t.section_bg_color);else if(t.bg_color)document.documentElement.style.setProperty('--card',t.bg_color);if(t.text_color)document.documentElement.style.setProperty('--text',t.text_color);if(t.hint_color)document.documentElement.style.setProperty('--text-secondary',t.hint_color);if(t.button_color)document.documentElement.style.setProperty('--primary',t.button_color);}}}catch(e){}
-
-// ========== INIT ==========
-currentWeekType=getAutoWeekType();
-document.getElementById('week-btn-1').classList.toggle('active',currentWeekType===1);
-document.getElementById('week-btn-2').classList.toggle('active',currentWeekType===2);
-document.getElementById('fab-btn').style.display='none';
-renderHome();
+// ==================== INITIALIZATION ====================
+updateWeekToggleButton();
+renderCalendarStrip();
+renderScheduleTimeline();
 </script>
 </body>
 </html>
