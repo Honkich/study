@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Учёба — ИКТО 2542</title>
+    <title>Учёба — ИКТО-2542</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -27,789 +27,199 @@
             --radius-sm: 10px;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            padding-bottom: calc(70px + var(--safe-bottom));
-            min-height: 100vh;
+            background: var(--bg); color: var(--text); overflow-x: hidden;
+            padding-bottom: calc(70px + var(--safe-bottom)); min-height: 100vh;
         }
 
-        /* Header */
-        .header {
-            background: var(--card);
-            padding: 16px 20px 12px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border);
-        }
+        .header { background:var(--card); padding:16px 20px 12px; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border); }
+        .header-title { font-size:13px; color:var(--text-secondary); font-weight:500; margin-bottom:2px; }
+        .header-group { font-size:20px; font-weight:700; }
+        .header-program { font-size:11px; color:var(--text-light); margin-top:2px; line-height:1.3; }
 
-        .header-title {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-bottom: 2px;
-        }
+        .page { display:none; padding:16px; animation:fadeIn .25s ease; }
+        .page.active { display:block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-        .header-group {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
+        .section-title { font-size:18px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .section-title .icon { font-size:20px; }
 
-        /* Page containers */
-        .page {
-            display: none;
-            padding: 16px;
-            animation: fadeIn 0.25s ease;
-        }
+        .card { background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
 
-        .page.active {
-            display: block;
-        }
+        /* Overview */
+        .overview-scroll { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; margin:0 -16px; padding-left:16px; padding-right:16px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; }
+        .overview-scroll::-webkit-scrollbar { display:none; }
+        .overview-card { min-width:140px; border-radius:var(--radius); padding:14px; color:white; scroll-snap-align:start; flex-shrink:0; cursor:pointer; }
+        .overview-card.schedule { background:linear-gradient(135deg,var(--primary),var(--primary-light)); }
+        .overview-card.homework { background:linear-gradient(135deg,var(--accent),var(--accent-light)); }
+        .overview-card.retake { background:linear-gradient(135deg,#F59E0B,#FBBF24); }
+        .overview-card.debts { background:linear-gradient(135deg,#EF4444,#F87171); }
+        .overview-card .ov-number { font-size:32px; font-weight:800; line-height:1; }
+        .overview-card .ov-label { font-size:12px; opacity:.9; margin-top:4px; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Day selector */
+        .day-selector { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; }
+        .day-selector::-webkit-scrollbar { display:none; }
+        .day-btn { display:flex; flex-direction:column; align-items:center; padding:8px 14px; border-radius:var(--radius-sm); border:none; background:var(--card); color:var(--text-secondary); font-size:12px; font-weight:600; cursor:pointer; min-width:52px; box-shadow:var(--shadow); transition:all .2s; }
+        .day-btn .day-num { font-size:16px; font-weight:700; margin-top:2px; color:var(--text); }
+        .day-btn.active { background:var(--primary); color:white; }
+        .day-btn.active .day-num { color:white; }
+        .day-btn.today { border:2px solid var(--primary); }
 
-        /* Section titles */
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title .icon {
-            font-size: 20px;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            transition: transform 0.15s ease;
-        }
-
-        .card:active {
-            transform: scale(0.98);
-        }
-
-        /* Home page - overview cards */
-        .overview-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            margin: 0 -16px;
-            padding-left: 16px;
-            padding-right: 16px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .overview-scroll::-webkit-scrollbar {
-            display: none;
-        }
-
-        .overview-card {
-            min-width: 160px;
-            border-radius: var(--radius);
-            padding: 16px;
-            color: white;
-            scroll-snap-align: start;
-            flex-shrink: 0;
-        }
-
-        .overview-card.schedule {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        }
-
-        .overview-card.homework {
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-        }
-
-        .overview-card.retake {
-            background: linear-gradient(135deg, #F59E0B, #FBBF24);
-        }
-
-        .overview-card .ov-number {
-            font-size: 32px;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        .overview-card .ov-label {
-            font-size: 13px;
-            opacity: 0.9;
-            margin-top: 4px;
-        }
-
-        /* Schedule */
-        .day-selector {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .day-selector::-webkit-scrollbar {
-            display: none;
-        }
-
-        .day-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 14px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: var(--card);
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            min-width: 52px;
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-        }
-
-        .day-btn .day-num {
-            font-size: 16px;
-            font-weight: 700;
-            margin-top: 2px;
-            color: var(--text);
-        }
-
-        .day-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .day-btn.active .day-num {
-            color: white;
-        }
-
-        .day-btn.today {
-            border: 2px solid var(--primary);
-        }
-
-        .schedule-date-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .schedule-date-label .cal-icon {
-            font-size: 18px;
-        }
+        .schedule-date-label { font-size:14px; color:var(--text-secondary); font-weight:600; margin-bottom:12px; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
 
         /* Lesson card */
-        .lesson-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            border-left: 4px solid transparent;
-        }
+        .lesson-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); display:flex; align-items:flex-start; gap:12px; border-left:4px solid transparent; }
+        .lesson-card.lecture { border-left-color:var(--primary); }
+        .lesson-card.seminar { border-left-color:var(--accent); }
+        .lesson-card.lab { border-left-color:var(--warning); }
+        .lesson-card.practice { border-left-color:var(--success); }
+        .lesson-num { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white; flex-shrink:0; }
+        .lesson-card.lecture .lesson-num { background:var(--primary); }
+        .lesson-card.seminar .lesson-num { background:var(--accent); }
+        .lesson-card.lab .lesson-num { background:var(--warning); }
+        .lesson-card.practice .lesson-num { background:var(--success); }
+        .lesson-info { flex:1; min-width:0; }
+        .lesson-type-time { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+        .lesson-type { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.3px; }
+        .lesson-card.lecture .lesson-type { color:var(--primary); }
+        .lesson-card.seminar .lesson-type { color:var(--accent); }
+        .lesson-card.lab .lesson-type { color:var(--warning); }
+        .lesson-card.practice .lesson-type { color:var(--success); }
+        .lesson-time { font-size:13px; font-weight:600; color:var(--text-secondary); }
+        .lesson-name { font-size:15px; font-weight:600; margin-bottom:2px; }
+        .lesson-room { font-size:13px; color:var(--text-light); }
+        .lesson-teacher { font-size:12px; color:var(--text-secondary); margin-top:2px; font-style:italic; }
+        .lesson-note { font-size:11px; color:var(--warning); margin-top:3px; font-weight:500; }
 
-        .lesson-card.lecture {
-            border-left-color: var(--primary);
-        }
+        /* HW card */
+        .hw-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); }
+        .hw-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+        .hw-subject { font-size:15px; font-weight:700; }
+        .hw-deadline { font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; white-space:nowrap; }
+        .hw-deadline.soon { background:#FEF3C7; color:#D97706; }
+        .hw-deadline.overdue { background:#FEE2E2; color:#DC2626; }
+        .hw-deadline.ok { background:#D1FAE5; color:#059669; }
+        .hw-text { font-size:14px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; }
+        .hw-footer { display:flex; justify-content:space-between; align-items:center; }
+        .hw-status { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-light); cursor:pointer; }
+        .hw-check { width:22px; height:22px; border-radius:6px; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; transition:all .2s; background:white; }
+        .hw-check.done { background:var(--success); border-color:var(--success); color:white; }
+        .hw-delete { background:none; border:none; color:var(--text-light); font-size:18px; cursor:pointer; padding:4px; border-radius:6px; }
+        .hw-done-card { opacity:.5; }
+        .hw-done-card .hw-subject { text-decoration:line-through; }
 
-        .lesson-card.seminar {
-            border-left-color: var(--accent);
-        }
+        /* Retake card */
+        .retake-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); border-left:4px solid var(--danger); }
+        .retake-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+        .retake-subject { font-size:15px; font-weight:700; }
+        .retake-date { font-size:13px; font-weight:600; color:var(--danger); }
+        .retake-info { font-size:13px; color:var(--text-secondary); line-height:1.4; }
+        .retake-footer { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+        .retake-days-left { font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; background:#FEE2E2; color:#DC2626; }
+        .retake-delete { background:none; border:none; color:var(--text-light); font-size:18px; cursor:pointer; padding:4px; border-radius:6px; }
 
-        .lesson-card.lab {
-            border-left-color: var(--warning);
-        }
+        /* Debt / Session card */
+        .debt-card { background:var(--card); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); border-left:4px solid var(--danger); transition:all .3s; }
+        .debt-card.has-retake { border-left-color:var(--warning); }
+        .debt-card.passed { border-left-color:var(--success); opacity:.6; }
+        .debt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+        .debt-subject { font-size:15px; font-weight:700; }
+        .debt-status { font-size:12px; font-weight:600; padding:3px 10px; border-radius:20px; }
+        .debt-status.not-passed { background:#FEE2E2; color:#DC2626; }
+        .debt-status.retake-set { background:#FEF3C7; color:#D97706; }
+        .debt-status.passed { background:#D1FAE5; color:#059669; }
+        .debt-details { font-size:13px; color:var(--text-secondary); line-height:1.5; }
+        .debt-details .detail-row { display:flex; align-items:center; gap:6px; margin-top:3px; }
+        .debt-actions { display:flex; gap:8px; margin-top:10px; }
+        .debt-btn { padding:7px 14px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:all .15s; }
+        .debt-btn.pass { background:#D1FAE5; color:#059669; }
+        .debt-btn.pass:active { background:#059669; color:white; }
+        .debt-btn.unpass { background:#FEE2E2; color:#DC2626; }
+        .debt-btn.edit { background:var(--bg); color:var(--text-secondary); }
 
-        .lesson-card.practice {
-            border-left-color: var(--success);
-        }
+        .attestation-banner { background:linear-gradient(135deg,#EF4444,#F97316); color:white; border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; }
+        .attestation-banner .ab-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+        .attestation-banner .ab-dates { font-size:13px; opacity:.9; }
+        .attestation-banner .ab-info { font-size:12px; opacity:.8; margin-top:4px; }
 
-        .lesson-num {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .lesson-card.lecture .lesson-num {
-            background: var(--primary);
-        }
-
-        .lesson-card.seminar .lesson-num {
-            background: var(--accent);
-        }
-
-        .lesson-card.lab .lesson-num {
-            background: var(--warning);
-        }
-
-        .lesson-card.practice .lesson-num {
-            background: var(--success);
-        }
-
-        .lesson-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .lesson-type-time {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .lesson-type {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .lesson-card.lecture .lesson-type { color: var(--primary); }
-        .lesson-card.seminar .lesson-type { color: var(--accent); }
-        .lesson-card.lab .lesson-type { color: var(--warning); }
-        .lesson-card.practice .lesson-type { color: var(--success); }
-
-        .lesson-time {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .lesson-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .lesson-room {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-
-        /* Homework */
-        .hw-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            position: relative;
-        }
-
-        .hw-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 6px;
-        }
-
-        .hw-subject {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .hw-deadline {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 6px;
-            white-space: nowrap;
-        }
-
-        .hw-deadline.soon {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-
-        .hw-deadline.overdue {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .hw-deadline.ok {
-            background: #D1FAE5;
-            color: #059669;
-        }
-
-        .hw-text {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .hw-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .hw-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--text-light);
-        }
-
-        .hw-check {
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
-            border: 2px solid var(--border);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            background: white;
-        }
-
-        .hw-check.done {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
-        }
-
-        .hw-delete {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-            transition: all 0.15s;
-        }
-
-        .hw-delete:hover {
-            color: var(--danger);
-            background: #FEE2E2;
-        }
-
-        /* Retake cards */
-        .retake-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--danger);
-        }
-
-        .retake-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-
-        .retake-subject {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .retake-date {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--danger);
-        }
-
-        .retake-info {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        .retake-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-        }
-
-        .retake-days-left {
-            font-size: 12px;
-            font-weight: 600;
-            padding: 3px 8px;
-            border-radius: 6px;
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .retake-delete {
-            background: none;
-            border: none;
-            color: var(--text-light);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-        }
+        /* Stats */
+        .debt-stats { display:flex; gap:10px; margin-bottom:16px; }
+        .debt-stat { flex:1; background:var(--card); border-radius:var(--radius-sm); padding:12px; text-align:center; box-shadow:var(--shadow); }
+        .debt-stat .ds-num { font-size:24px; font-weight:800; }
+        .debt-stat .ds-label { font-size:11px; color:var(--text-light); margin-top:2px; }
+        .debt-stat.total .ds-num { color:var(--danger); }
+        .debt-stat.retake .ds-num { color:var(--warning); }
+        .debt-stat.done .ds-num { color:var(--success); }
 
         /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
+        .empty-state { text-align:center; padding:40px 20px; color:var(--text-light); }
+        .empty-state .empty-icon { font-size:48px; margin-bottom:12px; }
+        .empty-state .empty-text { font-size:15px; font-weight:500; }
 
-        .empty-state .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
+        .no-classes { text-align:center; padding:40px 20px; }
+        .no-classes .emoji { font-size:48px; margin-bottom:8px; }
+        .no-classes .text { color:var(--text-light); font-size:15px; font-weight:500; }
 
-        .empty-state .empty-text {
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        /* FAB (floating action button) */
-        .fab {
-            position: fixed;
-            bottom: calc(80px + var(--safe-bottom));
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: var(--shadow-lg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 90;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-
-        .fab:active {
-            transform: scale(0.9);
-        }
+        /* FAB */
+        .fab { position:fixed; bottom:calc(80px + var(--safe-bottom)); right:20px; width:56px; height:56px; border-radius:16px; background:var(--primary); color:white; border:none; font-size:28px; cursor:pointer; box-shadow:var(--shadow-lg); display:flex; align-items:center; justify-content:center; z-index:90; transition:transform .2s; }
+        .fab:active { transform:scale(.9); }
 
         /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--card);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            padding-bottom: calc(8px + var(--safe-bottom));
-            border-top: 1px solid var(--border);
-            z-index: 100;
-        }
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); display:flex; justify-content:space-around; padding:6px 0; padding-bottom:calc(6px + var(--safe-bottom)); border-top:1px solid var(--border); z-index:100; }
+        .nav-item { display:flex; flex-direction:column; align-items:center; gap:1px; padding:4px 8px; border:none; background:none; color:var(--text-light); font-size:10px; font-weight:600; cursor:pointer; border-radius:10px; transition:color .2s; }
+        .nav-item .nav-icon { font-size:20px; }
+        .nav-item.active { color:var(--primary); }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 4px 12px;
-            border: none;
-            background: none;
-            color: var(--text-light);
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: color 0.2s ease;
-        }
+        /* Week toggle */
+        .week-toggle { display:flex; background:var(--bg); border-radius:var(--radius-sm); padding:3px; margin-bottom:14px; }
+        .week-toggle-btn { flex:1; padding:8px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; background:transparent; color:var(--text-secondary); transition:all .2s; font-family:inherit; }
+        .week-toggle-btn.active { background:var(--card); color:var(--text); box-shadow:var(--shadow); }
+        .week-auto-badge { display:inline-block; font-size:10px; padding:2px 6px; border-radius:10px; background:var(--primary); color:white; margin-left:4px; vertical-align:middle; font-weight:600; }
 
-        .nav-item .nav-icon {
-            font-size: 22px;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-item.active {
-            color: var(--primary);
-        }
-
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            animation: fadeInBg 0.2s ease;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        @keyframes fadeInBg {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal {
-            background: var(--card);
-            border-radius: 20px 20px 0 0;
-            padding: 24px 20px;
-            padding-bottom: calc(24px + var(--safe-bottom));
-            width: 100%;
-            max-width: 500px;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-handle {
-            width: 36px;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--border);
-            margin: 0 auto 16px;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--bg);
-            transition: border-color 0.2s ease;
-            outline: none;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--primary);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: var(--radius-sm);
-            background: var(--primary);
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.1s ease;
-            font-family: inherit;
-        }
-
-        .form-btn:active {
-            transform: scale(0.98);
-            background: var(--primary-dark);
-        }
+        .schedule-actions { display:flex; gap:8px; margin-bottom:14px; }
+        .schedule-action-btn { padding:8px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); background:var(--card); color:var(--text-secondary); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
 
         /* Filter tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
+        .filter-tabs { display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:4px; }
+        .filter-tabs::-webkit-scrollbar { display:none; }
+        .filter-tab { padding:7px 14px; border-radius:20px; border:none; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; background:var(--card); color:var(--text-secondary); box-shadow:var(--shadow); transition:all .2s; }
+        .filter-tab.active { background:var(--primary); color:white; }
 
-        .filter-tabs::-webkit-scrollbar { display: none; }
-
-        .filter-tab {
-            padding: 7px 14px;
-            border-radius: 20px;
-            border: none;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            background: var(--card);
-            color: var(--text-secondary);
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-        }
-
-        .filter-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* No classes */
-        .no-classes {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .no-classes .emoji {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        .no-classes .text {
-            color: var(--text-light);
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        /* Week type toggle */
-        .week-toggle {
-            display: flex;
-            background: var(--bg);
-            border-radius: var(--radius-sm);
-            padding: 3px;
-            margin-bottom: 14px;
-        }
-
-        .week-toggle-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            background: transparent;
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .week-toggle-btn.active {
-            background: var(--card);
-            color: var(--text);
-            box-shadow: var(--shadow);
-        }
-
-        /* Schedule edit buttons */
-        .schedule-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .schedule-action-btn {
-            padding: 8px 14px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--card);
-            color: var(--text-secondary);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.15s;
-        }
-
-        .schedule-action-btn:active {
-            background: var(--bg);
-        }
-
-        .hw-done-card {
-            opacity: 0.5;
-        }
-
-        .hw-done-card .hw-subject {
-            text-decoration: line-through;
-        }
+        /* Modal */
+        .modal-overlay { position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,.4); z-index:200; display:none; align-items:flex-end; justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:var(--card); border-radius:20px 20px 0 0; padding:24px 20px; padding-bottom:calc(24px + var(--safe-bottom)); width:100%; max-width:500px; max-height:85vh; overflow-y:auto; animation:slideUp .3s ease; }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .modal-handle { width:36px; height:4px; border-radius:2px; background:var(--border); margin:0 auto 16px; }
+        .modal-title { font-size:18px; font-weight:700; margin-bottom:16px; }
+        .form-group { margin-bottom:14px; }
+        .form-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:6px; display:block; }
+        .form-input,.form-select,.form-textarea { width:100%; padding:12px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); font-size:15px; font-family:inherit; color:var(--text); background:var(--bg); outline:none; transition:border-color .2s; }
+        .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--primary); }
+        .form-textarea { resize:vertical; min-height:80px; }
+        .form-btn { width:100%; padding:14px; border:none; border-radius:var(--radius-sm); background:var(--primary); color:white; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
+        .form-btn:active { transform:scale(.98); background:var(--primary-dark); }
     </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
-    <div class="header-title">СПбГУТ</div>
-    <div class="header-group">ИКТО 2542</div>
+    <div class="header-title">СПбГУТ им. проф. М.А. Бонч-Бруевича</div>
+    <div class="header-group">ИКТО-2542</div>
+    <div class="header-program">11.03.02 Инфокоммуникационные технологии и системы связи</div>
 </div>
 
-<!-- ===== PAGE: HOME ===== -->
+<!-- HOME -->
 <div class="page active" id="page-home">
-    <div style="margin-bottom: 20px;">
-        <div class="section-title"><span class="icon">👋</span> <span id="greeting">Привет!</span></div>
-        <div style="color: var(--text-secondary); font-size: 14px;" id="today-label"></div>
+    <div style="margin-bottom:20px;">
+        <div class="section-title"><span class="icon">👋</span><span id="greeting"></span></div>
+        <div style="color:var(--text-secondary);font-size:14px;" id="today-label"></div>
+        <div style="color:var(--text-light);font-size:12px;margin-top:2px;" id="week-type-label"></div>
     </div>
-
-    <div class="overview-scroll" style="margin-bottom: 20px;">
+    <div class="overview-scroll" style="margin-bottom:20px;">
         <div class="overview-card schedule" onclick="switchTab('schedule')">
             <div class="ov-number" id="home-lessons-count">0</div>
             <div class="ov-label">Пар сегодня</div>
@@ -818,90 +228,86 @@
             <div class="ov-number" id="home-hw-count">0</div>
             <div class="ov-label">Активных ДЗ</div>
         </div>
+        <div class="overview-card debts" onclick="switchTab('session')">
+            <div class="ov-number" id="home-debts-count">0</div>
+            <div class="ov-label">Долгов</div>
+        </div>
         <div class="overview-card retake" onclick="switchTab('retakes')">
             <div class="ov-number" id="home-retake-count">0</div>
             <div class="ov-label">Пересдач</div>
         </div>
     </div>
-
-    <div class="section-title"><span class="icon">📅</span> Пары сегодня</div>
+    <div class="section-title"><span class="icon">📅</span>Пары сегодня</div>
     <div id="home-today-lessons"></div>
-
-    <div style="margin-top: 20px;">
-        <div class="section-title"><span class="icon">📝</span> Ближайшие ДЗ</div>
-        <div id="home-upcoming-hw"></div>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <div class="section-title"><span class="icon">🔄</span> Ближайшие пересдачи</div>
-        <div id="home-upcoming-retakes"></div>
-    </div>
+    <div style="margin-top:20px;"><div class="section-title"><span class="icon">🚨</span>Долги</div><div id="home-debts-preview"></div></div>
+    <div style="margin-top:20px;"><div class="section-title"><span class="icon">📝</span>Ближайшие ДЗ</div><div id="home-upcoming-hw"></div></div>
 </div>
 
-<!-- ===== PAGE: SCHEDULE ===== -->
+<!-- SCHEDULE -->
 <div class="page" id="page-schedule">
-    <div class="section-title"><span class="icon">📅</span> Расписание</div>
-
+    <div class="section-title"><span class="icon">📅</span>Расписание</div>
     <div class="week-toggle">
-        <button class="week-toggle-btn active" onclick="setWeekType(1)" id="week-btn-1">Нечётная неделя</button>
-        <button class="week-toggle-btn" onclick="setWeekType(2)" id="week-btn-2">Чётная неделя</button>
+        <button class="week-toggle-btn" onclick="setWeekType(1)" id="week-btn-1">Нечётная <span class="week-auto-badge" id="auto-badge-1" style="display:none">сейчас</span></button>
+        <button class="week-toggle-btn" onclick="setWeekType(2)" id="week-btn-2">Чётная <span class="week-auto-badge" id="auto-badge-2" style="display:none">сейчас</span></button>
     </div>
-
     <div class="day-selector" id="day-selector"></div>
-
     <div class="schedule-date-label" id="schedule-date-label"></div>
-
     <div id="schedule-lessons"></div>
-
-    <div class="schedule-actions">
-        <button class="schedule-action-btn" onclick="openEditScheduleModal()">✏️ Редактировать</button>
-    </div>
+    <div class="schedule-actions"><button class="schedule-action-btn" onclick="openEditScheduleModal()">✏️ Редактировать</button></div>
 </div>
 
-<!-- ===== PAGE: HOMEWORK ===== -->
+<!-- HOMEWORK -->
 <div class="page" id="page-homework">
-    <div class="section-title"><span class="icon">📝</span> Домашние задания</div>
-
+    <div class="section-title"><span class="icon">📝</span>Домашние задания</div>
     <div class="filter-tabs">
-        <button class="filter-tab active" onclick="filterHW('all')">Все</button>
-        <button class="filter-tab" onclick="filterHW('active')">Активные</button>
-        <button class="filter-tab" onclick="filterHW('done')">Выполненные</button>
-        <button class="filter-tab" onclick="filterHW('overdue')">Просроченные</button>
+        <button class="filter-tab active" onclick="filterHW('all',this)">Все</button>
+        <button class="filter-tab" onclick="filterHW('active',this)">Активные</button>
+        <button class="filter-tab" onclick="filterHW('done',this)">Выполненные</button>
+        <button class="filter-tab" onclick="filterHW('overdue',this)">Просроченные</button>
     </div>
-
     <div id="hw-list"></div>
 </div>
 
-<!-- ===== PAGE: RETAKES ===== -->
+<!-- SESSION (DEBTS) -->
+<div class="page" id="page-session">
+    <div class="section-title"><span class="icon">🎓</span>Сессия / Долги</div>
+
+    <div class="attestation-banner">
+        <div class="ab-title">📋 2-я повторная аттестация (комиссии)</div>
+        <div class="ab-dates">📆 10 — 30 ноября 2026</div>
+        <div class="ab-info">Расписание по кафедрам на sut.ru/studentu/raspisanie</div>
+    </div>
+
+    <div class="debt-stats">
+        <div class="debt-stat total"><div class="ds-num" id="debt-total">0</div><div class="ds-label">Всего долгов</div></div>
+        <div class="debt-stat retake"><div class="ds-num" id="debt-retake">0</div><div class="ds-label">Назначено</div></div>
+        <div class="debt-stat done"><div class="ds-num" id="debt-done">0</div><div class="ds-label">Сдано</div></div>
+    </div>
+
+    <div id="debts-list"></div>
+
+    <button class="schedule-action-btn" onclick="openAddDebtModal()" style="margin-top:8px;">➕ Добавить долг</button>
+</div>
+
+<!-- RETAKES -->
 <div class="page" id="page-retakes">
-    <div class="section-title"><span class="icon">🔄</span> Пересдачи</div>
+    <div class="section-title"><span class="icon">🔄</span>Пересдачи</div>
     <div id="retakes-list"></div>
 </div>
 
 <!-- FAB -->
 <button class="fab" id="fab-btn" onclick="openAddModal()">+</button>
 
-<!-- Bottom Navigation -->
+<!-- Bottom Nav -->
 <div class="bottom-nav">
-    <button class="nav-item active" onclick="switchTab('home')" data-tab="home">
-        <span class="nav-icon">🏠</span>
-        <span>Главная</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('schedule')" data-tab="schedule">
-        <span class="nav-icon">📅</span>
-        <span>Расписание</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('homework')" data-tab="homework">
-        <span class="nav-icon">📝</span>
-        <span>ДЗ</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('retakes')" data-tab="retakes">
-        <span class="nav-icon">🔄</span>
-        <span>Пересдачи</span>
-    </button>
+    <button class="nav-item active" onclick="switchTab('home')" data-tab="home"><span class="nav-icon">🏠</span><span>Главная</span></button>
+    <button class="nav-item" onclick="switchTab('schedule')" data-tab="schedule"><span class="nav-icon">📅</span><span>Расписание</span></button>
+    <button class="nav-item" onclick="switchTab('session')" data-tab="session"><span class="nav-icon">🎓</span><span>Сессия</span></button>
+    <button class="nav-item" onclick="switchTab('homework')" data-tab="homework"><span class="nav-icon">📝</span><span>ДЗ</span></button>
+    <button class="nav-item" onclick="switchTab('retakes')" data-tab="retakes"><span class="nav-icon">🔄</span><span>Пересдачи</span></button>
 </div>
 
-<!-- Modal: Add -->
+<!-- Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
         <div class="modal-handle"></div>
@@ -910,630 +316,406 @@
 </div>
 
 <script>
-// ========== DATA ==========
-const DAYS = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-const DAYS_SHORT = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DAYS=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const DAYS_SHORT=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const MONTHS=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
-// Default schedule for ИКТО 2542 (sample, user can edit)
-const DEFAULT_SCHEDULE = {
-    // Week type 1 (нечётная), days 1-6 (Mon-Sat)
-    "1": {
-        "1": [ // Понедельник
-            { num: 1, type: "lecture", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 301" },
-            { num: 2, type: "lecture", name: "Информатика и программирование", time: "11:10 - 12:40", room: "Каб. 415" },
-            { num: 3, type: "seminar", name: "Иностранный язык", time: "13:30 - 15:00", room: "Каб. 210" }
-        ],
-        "2": [ // Вторник
-            { num: 1, type: "lecture", name: "Физика", time: "9:30 - 11:00", room: "Каб. 505" },
-            { num: 2, type: "lab", name: "Информатика и программирование", time: "11:10 - 12:40", room: "Каб. 418" },
-            { num: 3, type: "lecture", name: "История России", time: "13:30 - 15:00", room: "Каб. 102" }
-        ],
-        "3": [ // Среда
-            { num: 1, type: "seminar", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 303" },
-            { num: 2, type: "lecture", name: "Теория электрических цепей", time: "11:10 - 12:40", room: "Каб. 412" },
-            { num: 3, type: "lab", name: "Физика", time: "13:30 - 15:00", room: "Каб. 507" }
-        ],
-        "4": [ // Четверг
-            { num: 1, type: "lecture", name: "Инженерная графика", time: "9:30 - 11:00", room: "Каб. 220" },
-            { num: 2, type: "practice", name: "Физическая культура", time: "11:10 - 12:40", room: "Спортзал" }
-        ],
-        "5": [ // Пятница
-            { num: 1, type: "lecture", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 301" },
-            { num: 2, type: "seminar", name: "Теория электрических цепей", time: "11:10 - 12:40", room: "Каб. 412" },
-            { num: 3, type: "lecture", name: "Информатика и программирование", time: "13:30 - 15:00", room: "Каб. 415" }
-        ],
-        "6": [] // Суббота
+// ========== REAL SCHEDULE: ИКТО-2542, СПбГУТ ==========
+const DEFAULT_SCHEDULE={"1":{"1":[{num:2,type:"lecture",name:"Технологии программирования",time:"10:45 - 12:20",room:"Ауд. 110, Б22/1",teacher:"Дагаев А.В."},{num:3,type:"lecture",name:"Математические модели в сетях связи",time:"13:00 - 14:35",room:"Ауд. 106, Б22/1",teacher:"Гришин И.В."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"2":[{num:1,type:"lab",name:"Математические модели в сетях связи",time:"09:00 - 10:35",room:"Ауд. 417, Б22/2",teacher:"Лобастова М.В."},{num:2,type:"lab",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 504, Б22/1",teacher:"Шемякин С.Н."}],"3":[{num:1,type:"practice",name:"Материалы электронной техники",time:"09:00 - 10:35",room:"Ауд. 413, Б22/1",teacher:"Арсирий А.И.",note:"13-я неделя"},{num:2,type:"lecture",name:"Физика (спецглавы)",time:"10:45 - 12:20",room:"Ауд. 704, Б22/1",teacher:"Урванцева Н.Л."},{num:3,type:"practice",name:"Электропитание устройств и систем ТК",time:"13:00 - 14:35",room:"Ауд. 406, Б22/2",teacher:"Виноградов П.Ю."},{num:4,type:"lab",name:"Физика (спецглавы)",time:"14:45 - 16:20",room:"Ауд. 317, Б22/1",teacher:"Урванцева Н.Л."},{num:5,type:"practice",name:"Многоканальные ТК системы",time:"16:30 - 18:05",room:"Ауд. 447, Б22/2",teacher:"Герасимов А.М."}],"4":[{num:1,type:"lab",name:"Электроника",time:"09:00 - 10:35",room:"Ауд. 446, Б22/1",teacher:"Ланда А.Э."},{num:2,type:"lecture",name:"Электроника",time:"10:45 - 12:20",room:"Ауд. 112, Б22/1",teacher:"Ланда А.Э."},{num:3,type:"lecture",name:"Многоканальные ТК системы",time:"13:00 - 14:35",room:"Ауд. 112, Б22/1",teacher:"Матюхин А.Ю."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"5":[],"6":[{num:1,type:"lab",name:"Технологии программирования",time:"09:00 - 10:35",room:"Ауд. 515, Б22/2",teacher:"Дагаев А.В."},{num:2,type:"practice",name:"Теория вероятностей и мат. статистика",time:"10:45 - 12:20",room:"Ауд. 511, Б22/2",teacher:"Воронова М.В."},{num:3,type:"practice",name:"Теория вероятностей и мат. статистика",time:"13:00 - 14:35",room:"Ауд. 511, Б22/2",teacher:"Воронова М.В."}]},"2":{"1":[{num:1,type:"practice",name:"Технологии программирования",time:"09:00 - 10:35",room:"Ауд. 233, Б22/2",teacher:"Дагаев А.В."},{num:2,type:"lecture",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 110, Б22/1",teacher:"Бабков И.Н."}],"2":[{num:1,type:"practice",name:"Математические модели в сетях связи",time:"09:00 - 10:35",room:"Ауд. 417, Б22/2",teacher:"Лобастова М.В."},{num:2,type:"practice",name:"Основы защиты информации в ТКС",time:"10:45 - 12:20",room:"Ауд. 504, Б22/1",teacher:"Шемякин С.Н."},{num:3,type:"practice",name:"Электроника",time:"13:00 - 14:35",room:"Ауд. 446, Б22/1",teacher:"Ланда А.Э."},{num:4,type:"lab",name:"Материалы электронной техники",time:"14:45 - 16:20",room:"Ауд. 413, Б22/1",teacher:"Арсирий А.И."}],"3":[{num:3,type:"lab",name:"Электропитание устройств и систем ТК",time:"13:00 - 14:35",room:"Ауд. 406, Б22/2",teacher:"Копылова И.В."},{num:4,type:"practice",name:"Физика (спецглавы)",time:"14:45 - 16:20",room:"Ауд. 301, Б22/1",teacher:"Урванцева Н.Л."},{num:5,type:"lab",name:"Многоканальные ТК системы",time:"16:30 - 18:05",room:"Ауд. 447, Б22/2",teacher:"Герасимов А.М."}],"4":[{num:1,type:"lecture",name:"Электропитание устройств и систем ТК",time:"09:00 - 10:35",room:"Ауд. 106, Б22/1",teacher:"Виноградов П.Ю."},{num:2,type:"lecture",name:"Теория вероятностей и мат. статистика",time:"10:45 - 12:20",room:"Ауд. 106, Б22/1",teacher:"Камартина Н.М."},{num:3,type:"lecture",name:"Материалы электронной техники",time:"13:00 - 14:35",room:"Ауд. 106, Б22/1",teacher:"Арсирий А.И."},{num:"ФЗ",type:"practice",name:"Элективные дисциплины по физ. культуре",time:"15:00 - 16:30",room:"Динамит, Ч13В",teacher:"Сапсаева Т.В."}],"5":[],"6":[]}};
+
+// ========== DEFAULT DEBTS ==========
+const DEFAULT_DEBTS = [
+    {
+        id: "d1", subject: "Физические основы электроники (ФОЭ)", status: "retake_set",
+        retakeDate: "2026-11-19", retakeTime: "10:45 - 14:00", retakeInfo: "Ауд. 306/1 (каф. электроники)",
+        allDates: ["12.11 — 15:00–18:05, ауд. 448/1 ✅","17.11 — 15:00–18:05, ауд. 314/1 ✅","19.11 — 10:45–14:00, ауд. 306/1","26.11 — 10:45–14:00, ауд. 306/1"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/84.pdf",
+        commission: "Зав. каф. Шумаков П.П., декан РСР Владыко А.Г.",
+        year: "2025-2026"
     },
-    // Week type 2 (чётная)
-    "2": {
-        "1": [
-            { num: 1, type: "lecture", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 301" },
-            { num: 2, type: "seminar", name: "Информатика и программирование", time: "11:10 - 12:40", room: "Каб. 418" },
-            { num: 3, type: "lecture", name: "Иностранный язык", time: "13:30 - 15:00", room: "Каб. 210" }
-        ],
-        "2": [
-            { num: 1, type: "lecture", name: "Физика", time: "9:30 - 11:00", room: "Каб. 505" },
-            { num: 2, type: "seminar", name: "Физика", time: "11:10 - 12:40", room: "Каб. 506" },
-            { num: 3, type: "lecture", name: "История России", time: "13:30 - 15:00", room: "Каб. 102" }
-        ],
-        "3": [
-            { num: 1, type: "lecture", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 301" },
-            { num: 2, type: "lecture", name: "Теория электрических цепей", time: "11:10 - 12:40", room: "Каб. 412" },
-            { num: 3, type: "lab", name: "Инженерная графика", time: "13:30 - 15:00", room: "Каб. 222" }
-        ],
-        "4": [
-            { num: 1, type: "lab", name: "Теория электрических цепей", time: "9:30 - 11:00", room: "Каб. 414" },
-            { num: 2, type: "practice", name: "Физическая культура", time: "11:10 - 12:40", room: "Спортзал" }
-        ],
-        "5": [
-            { num: 1, type: "seminar", name: "Высшая математика", time: "9:30 - 11:00", room: "Каб. 303" },
-            { num: 2, type: "lecture", name: "Информатика и программирование", time: "11:10 - 12:40", room: "Каб. 415" },
-            { num: 3, type: "seminar", name: "История России", time: "13:30 - 15:00", room: "Каб. 104" }
-        ],
-        "6": []
+    {
+        id: "d2", subject: "Физическая культура", status: "retake_set",
+        retakeDate: "2026-11-27", retakeTime: "09:00 - 15:00", retakeInfo: "СК «Динамит» (каф. ФК)",
+        allDates: ["12.11 — 09:00–15:00, СК «Динамит» ✅","16.11 — 09:00–15:00, СК «Динамит» ✅","27.11 — 09:00–15:00, СК «Динамит»"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/75.pdf",
+        commission: "Зав. каф. Кабаев И.Е., декан СТЭД Шутман Д.В.",
+        year: "2025-2026"
+    },
+    {
+        id: "d3", subject: "Физика", status: "retake_set",
+        retakeDate: "2026-11-23", retakeTime: "12:30 - 14:45", retakeInfo: "Ауд. 311/1 (каф. физики)",
+        allDates: ["16.11 — 12:30–14:45, ауд. 311/1 ✅","23.11 — 12:30–14:45, ауд. 311/1","30.11 — 12:30–14:45, ауд. 311/1"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/82.pdf",
+        commission: "Зав. каф. Передистов Е.Ю., декан РСР Владыко А.Г.",
+        year: "2025-2026"
+    },
+    {
+        id: "d4", subject: "Иностранный язык", status: "retake_set",
+        retakeDate: "2026-11-24", retakeTime: "16:30 - 19:00", retakeInfo: "Ауд. 317/2, тех. секция (каф. ИЯ)",
+        allDates: ["10.11 — 16:30–19:00, ауд. 317/2 ✅","17.11 — 16:30–19:00, ауд. 317/2 ✅","24.11 — 16:30–19:00, ауд. 317/2"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/42.pdf",
+        commission: "Зав. каф. ИнЯз Алешин А.С., декан СТЭД Шутман Д.В.",
+        year: "2025-2026"
+    },
+    {
+        id: "d5", subject: "Организация и управление предприятиями", status: "retake_set",
+        retakeDate: "2026-11-24", retakeTime: "14:45 - 18:05", retakeInfo: "Ауд. 338/1 (каф. ЭД)",
+        allDates: ["10.11 — 14:45–18:05, ауд. 338/1 ✅","17.11 — 14:45–18:05, ауд. 338/1 ✅","24.11 — 14:45–18:05, ауд. 338/1"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/67.pdf",
+        commission: "Зав. каф. ЭД Калимуллина О.В., декан СТЭД Шутман Д.В.",
+        year: "2025-2026"
+    },
+    {
+        id: "d6", subject: "Компоненты электронной техники (КЭТ)", status: "retake_set",
+        retakeDate: "2026-11-23", retakeTime: "12:30 - 16:30", retakeInfo: "Ауд. 425/1 (каф. КПРЭС)",
+        allDates: ["10.11 — 12:30–16:30, ауд. 425/1 ✅","16.11 — 12:30–16:30, ауд. 425/1 ✅","23.11 — 12:30–16:30, ауд. 425/1","30.11 — 12:30–16:30, ауд. 425/1"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/72.pdf",
+        commission: "Зав. каф. Адонин Л.С., декан РСР Владыко А.Г.",
+        year: "2025-2026"
+    },
+    {
+        id: "d7", subject: "Дискретная математика", status: "retake_set",
+        retakeDate: "2026-11-18", retakeTime: "09:00 - 12:30", retakeInfo: "Ауд. 112/1, ф-т РСР (каф. ВМ). Также: 27.11 ауд. 707/1 ф-т ИКСС",
+        allDates: ["18.11 — 09:00–12:30, ауд. 112/1 (РСР) ⬅️ СЕГОДНЯ","27.11 — 09:00–12:30, ауд. 707/1 (ИКСС)"],
+        pdfUrl: "https://www.sut.ru/doci/umu/peresdacha/2/79.pdf",
+        commission: "Зав. каф. Плотников П.В., декан ИТПИ Литвинов В.Л.",
+        year: "2025-2026"
     }
-};
+];
 
-// ========== STATE ==========
-let currentTab = 'home';
-let selectedDay = new Date().getDay(); // 0=Sun, 1=Mon, etc.
-if (selectedDay === 0) selectedDay = 1;
-let currentWeekType = 1;
-let hwFilter = 'all';
+// ========== STORAGE ==========
+let currentTab='home', selectedDay=new Date().getDay()||1, currentWeekType=1, hwFilter='all';
 
-function getSchedule() {
-    const saved = localStorage.getItem('study_schedule');
-    return saved ? JSON.parse(saved) : DEFAULT_SCHEDULE;
-}
+const DEFAULT_RETAKES = [
+    { id:"r1", debtId:"d7", subject:"Дискретная математика", date:"2026-11-18", info:"09:00–12:30 · Ауд. 112/1 (ф-т РСР)" },
+    { id:"r2", debtId:"d1", subject:"ФОЭ", date:"2026-11-19", info:"10:45–14:00 · Ауд. 306/1" },
+    { id:"r3", debtId:"d3", subject:"Физика", date:"2026-11-23", info:"12:30–14:45 · Ауд. 311/1" },
+    { id:"r4", debtId:"d6", subject:"КЭТ", date:"2026-11-23", info:"12:30–16:30 · Ауд. 425/1" },
+    { id:"r5", debtId:"d4", subject:"Иностранный язык", date:"2026-11-24", info:"16:30–19:00 · Ауд. 317/2 (тех. секция)" },
+    { id:"r6", debtId:"d5", subject:"Организация и управление предприятиями", date:"2026-11-24", info:"14:45–18:05 · Ауд. 338/1" },
+    { id:"r7", debtId:"d1", subject:"ФОЭ (повтор)", date:"2026-11-26", info:"10:45–14:00 · Ауд. 306/1" },
+    { id:"r8", debtId:"d2", subject:"Физическая культура", date:"2026-11-27", info:"09:00–15:00 · СК «Динамит»" },
+    { id:"r9", debtId:"d7", subject:"Дискретная математика", date:"2026-11-27", info:"09:00–12:30 · Ауд. 707/1 (ф-т ИКСС)" },
+    { id:"r10", debtId:"d3", subject:"Физика (повтор)", date:"2026-11-30", info:"12:30–14:45 · Ауд. 311/1" },
+    { id:"r11", debtId:"d6", subject:"КЭТ (повтор)", date:"2026-11-30", info:"12:30–16:30 · Ауд. 425/1" }
+];
 
-function saveSchedule(data) {
-    localStorage.setItem('study_schedule', JSON.stringify(data));
-}
+function getSchedule(){ const s=localStorage.getItem('study_schedule_v2'); return s?JSON.parse(s):DEFAULT_SCHEDULE; }
+function saveSchedule(d){ localStorage.setItem('study_schedule_v2',JSON.stringify(d)); }
+function getHomeworks(){ const s=localStorage.getItem('study_homeworks'); return s?JSON.parse(s):[]; }
+function saveHomeworks(d){ localStorage.setItem('study_homeworks',JSON.stringify(d)); }
+function getRetakes(){ const s=localStorage.getItem('study_retakes'); return s?JSON.parse(s):DEFAULT_RETAKES; }
+function saveRetakes(d){ localStorage.setItem('study_retakes',JSON.stringify(d)); }
+function getDebts(){ const s=localStorage.getItem('study_debts'); return s?JSON.parse(s):DEFAULT_DEBTS; }
+function saveDebts(d){ localStorage.setItem('study_debts',JSON.stringify(d)); }
 
-function getHomeworks() {
-    const saved = localStorage.getItem('study_homeworks');
-    return saved ? JSON.parse(saved) : [];
-}
+function getAutoWeekType(){ const n=new Date(),s=new Date(n.getFullYear(),0,1),d=(n-s+((s.getTimezoneOffset()-n.getTimezoneOffset())*60000))/864e5; return Math.ceil((d+s.getDay()+1)/7)%2===1?1:2; }
 
-function saveHomeworks(data) {
-    localStorage.setItem('study_homeworks', JSON.stringify(data));
-}
-
-function getRetakes() {
-    const saved = localStorage.getItem('study_retakes');
-    return saved ? JSON.parse(saved) : [];
-}
-
-function saveRetakes(data) {
-    localStorage.setItem('study_retakes', JSON.stringify(data));
-}
-
-// ========== NAVIGATION ==========
-function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + tab).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-
-    // Show/hide FAB
-    const fab = document.getElementById('fab-btn');
-    fab.style.display = (tab === 'homework' || tab === 'retakes') ? 'flex' : 'none';
-
+// ========== NAV ==========
+function switchTab(tab){
+    currentTab=tab;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+tab).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    const navBtn=document.querySelector(`[data-tab="${tab}"]`);
+    if(navBtn) navBtn.classList.add('active');
+    const fab=document.getElementById('fab-btn');
+    fab.style.display=(tab==='homework'||tab==='retakes')?'flex':'none';
     renderCurrentPage();
 }
 
-function renderCurrentPage() {
-    switch (currentTab) {
-        case 'home': renderHome(); break;
-        case 'schedule': renderSchedule(); break;
-        case 'homework': renderHomework(); break;
-        case 'retakes': renderRetakes(); break;
+function renderCurrentPage(){
+    switch(currentTab){
+        case'home':renderHome();break;
+        case'schedule':renderSchedule();break;
+        case'homework':renderHomework();break;
+        case'session':renderSession();break;
+        case'retakes':renderRetakes();break;
     }
 }
 
 // ========== HOME ==========
-function renderHome() {
-    const now = new Date();
-    const hour = now.getHours();
-    let greet = 'Доброй ночи! 🌙';
-    if (hour >= 5 && hour < 12) greet = 'Доброе утро! ☀️';
-    else if (hour >= 12 && hour < 17) greet = 'Добрый день! 🌤';
-    else if (hour >= 17 && hour < 23) greet = 'Добрый вечер! 🌆';
-    document.getElementById('greeting').textContent = greet;
+function renderHome(){
+    const now=new Date(), h=now.getHours();
+    let g='Доброй ночи! 🌙';
+    if(h>=5&&h<12)g='Доброе утро! ☀️';else if(h>=12&&h<17)g='Добрый день! 🌤';else if(h>=17&&h<23)g='Добрый вечер! 🌆';
+    document.getElementById('greeting').textContent=g;
+    document.getElementById('today-label').textContent=`${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
+    const aw=getAutoWeekType();
+    document.getElementById('week-type-label').textContent=aw===1?'📌 Нечётная неделя':'📌 Чётная неделя';
 
-    const dayName = DAYS[now.getDay()];
-    const dateStr = `${dayName}, ${now.getDate()} ${MONTHS[now.getMonth()]}`;
-    document.getElementById('today-label').textContent = dateStr;
+    const sch=getSchedule(), dow=now.getDay();
+    const tl=(dow>=1&&dow<=6)?(sch[aw]&&sch[aw][dow]?sch[aw][dow]:[]):[];
+    document.getElementById('home-lessons-count').textContent=tl.length;
+    document.getElementById('home-today-lessons').innerHTML=tl.length?tl.map(renderLessonCard).join(''):'<div class="no-classes"><div class="emoji">🎉</div><div class="text">Сегодня пар нет!</div></div>';
 
-    // Today's lessons
-    const schedule = getSchedule();
-    const todayDow = now.getDay();
-    const weekType = getAutoWeekType();
-    const todayLessons = (todayDow >= 1 && todayDow <= 6) ?
-        (schedule[weekType] && schedule[weekType][todayDow] ? schedule[weekType][todayDow] : []) : [];
+    const hws=getHomeworks().filter(h=>!h.done).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,3);
+    document.getElementById('home-hw-count').textContent=getHomeworks().filter(h=>!h.done).length;
+    document.getElementById('home-upcoming-hw').innerHTML=hws.length?hws.map(renderHWCard).join(''):'<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Нет активных ДЗ</div></div>';
 
-    document.getElementById('home-lessons-count').textContent = todayLessons.length;
+    const debts=getDebts().filter(d=>d.status!=='passed');
+    document.getElementById('home-debts-count').textContent=debts.length;
+    document.getElementById('home-debts-preview').innerHTML=debts.length?debts.slice(0,3).map(renderDebtCardMini).join('')+(debts.length>3?`<div style="text-align:center;margin-top:8px;"><button class="schedule-action-btn" onclick="switchTab('session')">Показать все (${debts.length})</button></div>`:''):'<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">Долгов нет!</div></div>';
 
-    const lessonsHtml = todayLessons.length > 0 ?
-        todayLessons.map(l => renderLessonCard(l)).join('') :
-        '<div class="no-classes"><div class="emoji">🎉</div><div class="text">Сегодня пар нет!</div></div>';
-    document.getElementById('home-today-lessons').innerHTML = lessonsHtml;
-
-    // Upcoming HW
-    const hws = getHomeworks().filter(h => !h.done).sort((a,b) => new Date(a.deadline) - new Date(b.deadline)).slice(0, 3);
-    document.getElementById('home-hw-count').textContent = getHomeworks().filter(h => !h.done).length;
-    document.getElementById('home-upcoming-hw').innerHTML = hws.length > 0 ?
-        hws.map(h => renderHWCard(h)).join('') :
-        '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Нет активных ДЗ</div></div>';
-
-    // Upcoming retakes
-    const retakes = getRetakes().sort((a,b) => new Date(a.date) - new Date(b.date)).slice(0, 3);
-    document.getElementById('home-retake-count').textContent = retakes.length;
-    document.getElementById('home-upcoming-retakes').innerHTML = retakes.length > 0 ?
-        retakes.map(r => renderRetakeCard(r)).join('') :
-        '<div class="empty-state"><div class="empty-icon">🎓</div><div class="empty-text">Пересдач нет</div></div>';
+    document.getElementById('home-retake-count').textContent=getRetakes().length;
 }
 
-function getAutoWeekType() {
-    // Simple: use ISO week number to determine odd/even
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const diff = (now - start + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60000)) / 86400000;
-    const weekNum = Math.ceil((diff + start.getDay() + 1) / 7);
-    return (weekNum % 2 === 1) ? 1 : 2;
+function renderDebtCardMini(d){
+    const statusLabels={not_passed:'❌ Не сдано',retake_set:'📅 Назначена пересдача',passed:'✅ Сдано'};
+    const statusClass={not_passed:'not-passed',retake_set:'retake-set',passed:'passed'};
+    return `<div class="debt-card ${d.status==='retake_set'?'has-retake':''} ${d.status==='passed'?'passed':''}">
+        <div class="debt-header">
+            <div class="debt-subject">${d.subject}</div>
+            <div class="debt-status ${statusClass[d.status]}">${statusLabels[d.status]}</div>
+        </div>
+        ${d.retakeDate?`<div class="debt-details"><div class="detail-row">📆 ${formatDate(d.retakeDate)}</div>${d.retakeInfo?`<div class="detail-row">📍 ${d.retakeInfo}</div>`:''}</div>`:''}
+    </div>`;
 }
 
 // ========== SCHEDULE ==========
-function setWeekType(type) {
-    currentWeekType = type;
-    document.getElementById('week-btn-1').classList.toggle('active', type === 1);
-    document.getElementById('week-btn-2').classList.toggle('active', type === 2);
-    renderSchedule();
+function setWeekType(t){ currentWeekType=t; document.getElementById('week-btn-1').classList.toggle('active',t===1); document.getElementById('week-btn-2').classList.toggle('active',t===2); renderSchedule(); }
+
+function renderSchedule(){
+    const now=new Date(), aw=getAutoWeekType();
+    document.getElementById('auto-badge-1').style.display=aw===1?'inline':'none';
+    document.getElementById('auto-badge-2').style.display=aw===2?'inline':'none';
+
+    const ws=new Date(now); ws.setDate(now.getDate()-(now.getDay()===0?6:now.getDay()-1));
+    let sh='';
+    for(let i=0;i<6;i++){const d=new Date(ws);d.setDate(ws.getDate()+i);const dw=d.getDay();sh+=`<button class="day-btn ${(i+1)===selectedDay?'active':''} ${d.toDateString()===now.toDateString()?'today':''}" onclick="selectDay(${i+1})"><span>${DAYS_SHORT[dw]}</span><span class="day-num">${d.getDate()}</span></button>`;}
+    document.getElementById('day-selector').innerHTML=sh;
+
+    const sd=new Date(ws);sd.setDate(ws.getDate()+selectedDay-1);
+    document.getElementById('schedule-date-label').innerHTML=`<span class="cal-icon">📆</span> ${DAYS[sd.getDay()]}, ${sd.getDate()} ${MONTHS[sd.getMonth()]}`;
+
+    const sch=getSchedule(), les=sch[currentWeekType]&&sch[currentWeekType][selectedDay]?sch[currentWeekType][selectedDay]:[];
+    const noMsg=selectedDay===5?'<div class="no-classes"><div class="emoji">📖</div><div class="text">День самостоятельной работы</div></div>':'<div class="no-classes"><div class="emoji">😴</div><div class="text">В этот день пар нет</div></div>';
+    document.getElementById('schedule-lessons').innerHTML=les.length?les.map(renderLessonCard).join(''):noMsg;
 }
 
-function renderSchedule() {
-    const now = new Date();
-    const todayDow = now.getDay();
+function selectDay(d){ selectedDay=d; renderSchedule(); }
 
-    // Day selector (Mon-Sat)
-    let selectorHtml = '';
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
-
-    for (let i = 0; i < 6; i++) {
-        const d = new Date(weekStart);
-        d.setDate(weekStart.getDate() + i);
-        const dow = d.getDay(); // 1-6
-        const isActive = (i + 1) === selectedDay;
-        const isToday = d.toDateString() === now.toDateString();
-        selectorHtml += `<button class="day-btn ${isActive ? 'active' : ''} ${isToday ? 'today' : ''}" onclick="selectDay(${i+1})">
-            <span>${DAYS_SHORT[dow]}</span>
-            <span class="day-num">${d.getDate()}</span>
-        </button>`;
-    }
-    document.getElementById('day-selector').innerHTML = selectorHtml;
-
-    // Date label
-    const selDate = new Date(weekStart);
-    selDate.setDate(weekStart.getDate() + selectedDay - 1);
-    const dateLabel = `${DAYS[selDate.getDay()]}, ${selDate.getDate()} ${MONTHS[selDate.getMonth()]}`;
-    document.getElementById('schedule-date-label').innerHTML = `<span class="cal-icon">📆</span> ${dateLabel}`;
-
-    // Lessons
-    const schedule = getSchedule();
-    const lessons = schedule[currentWeekType] && schedule[currentWeekType][selectedDay]
-        ? schedule[currentWeekType][selectedDay] : [];
-
-    document.getElementById('schedule-lessons').innerHTML = lessons.length > 0 ?
-        lessons.map(l => renderLessonCard(l)).join('') :
-        '<div class="no-classes"><div class="emoji">😴</div><div class="text">В этот день пар нет</div></div>';
-}
-
-function selectDay(day) {
-    selectedDay = day;
-    renderSchedule();
-}
-
-function renderLessonCard(lesson) {
-    const typeLabels = { lecture: 'Лекция', seminar: 'Семинар', lab: 'Лабораторная', practice: 'Практика' };
-    return `<div class="lesson-card ${lesson.type}">
-        <div class="lesson-num">${lesson.num}</div>
-        <div class="lesson-info">
-            <div class="lesson-type-time">
-                <span class="lesson-type">${typeLabels[lesson.type] || lesson.type}</span>
-                <span class="lesson-time">${lesson.time}</span>
-            </div>
-            <div class="lesson-name">${lesson.name}</div>
-            <div class="lesson-room">${lesson.room}</div>
-        </div>
-    </div>`;
+function renderLessonCard(l){
+    const tl={lecture:'Лекция',seminar:'Семинар',lab:'Лаб. работа',practice:'Практ. занятие'};
+    return `<div class="lesson-card ${l.type}"><div class="lesson-num">${l.num}</div><div class="lesson-info"><div class="lesson-type-time"><span class="lesson-type">${tl[l.type]||l.type}</span><span class="lesson-time">${l.time}</span></div><div class="lesson-name">${l.name}</div><div class="lesson-room">📍 ${l.room}</div>${l.teacher?`<div class="lesson-teacher">👤 ${l.teacher}</div>`:''}${l.note?`<div class="lesson-note">⚠️ ${l.note}</div>`:''}</div></div>`;
 }
 
 // ========== HOMEWORK ==========
-function filterHW(filter) {
-    hwFilter = filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
-    renderHomework();
+function filterHW(f,btn){ hwFilter=f; document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active')); if(btn)btn.classList.add('active'); renderHomework(); }
+
+function renderHomework(){
+    let hws=getHomeworks(); const now=new Date();now.setHours(0,0,0,0);
+    if(hwFilter==='active')hws=hws.filter(h=>!h.done);else if(hwFilter==='done')hws=hws.filter(h=>h.done);else if(hwFilter==='overdue')hws=hws.filter(h=>!h.done&&new Date(h.deadline)<now);
+    hws.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+    document.getElementById('hw-list').innerHTML=hws.length?hws.map(renderHWCard).join(''):'<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">Нет заданий</div></div>';
 }
 
-function renderHomework() {
-    let hws = getHomeworks();
-    const now = new Date();
-    now.setHours(0,0,0,0);
-
-    if (hwFilter === 'active') hws = hws.filter(h => !h.done);
-    else if (hwFilter === 'done') hws = hws.filter(h => h.done);
-    else if (hwFilter === 'overdue') hws = hws.filter(h => !h.done && new Date(h.deadline) < now);
-
-    hws.sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
-
-    document.getElementById('hw-list').innerHTML = hws.length > 0 ?
-        hws.map(h => renderHWCard(h)).join('') :
-        '<div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">Нет заданий</div></div>';
+function renderHWCard(hw){
+    const now=new Date();now.setHours(0,0,0,0);const dl=new Date(hw.deadline);dl.setHours(0,0,0,0);const diff=Math.ceil((dl-now)/864e5);
+    let dc='ok',dt='';
+    if(hw.done){dc='ok';dt='✅ Выполнено';}else if(diff<0){dc='overdue';dt=`Просрочено ${Math.abs(diff)} дн.`;}else if(diff===0){dc='overdue';dt='Сегодня!';}else if(diff<=3){dc='soon';dt=`Через ${diff} дн.`;}else{dt=`${dl.getDate()} ${MONTHS[dl.getMonth()]}`;}
+    return `<div class="hw-card ${hw.done?'hw-done-card':''}"><div class="hw-header"><div class="hw-subject">${hw.subject}</div><div class="hw-deadline ${dc}">${dt}</div></div><div class="hw-text">${hw.text}</div><div class="hw-footer"><div class="hw-status" onclick="toggleHW('${hw.id}')"><div class="hw-check ${hw.done?'done':''}">${hw.done?'✓':''}</div><span>${hw.done?'Выполнено':'Отметить'}</span></div><button class="hw-delete" onclick="deleteHW('${hw.id}')">🗑</button></div></div>`;
 }
 
-function renderHWCard(hw) {
-    const now = new Date();
-    now.setHours(0,0,0,0);
-    const deadline = new Date(hw.deadline);
-    deadline.setHours(0,0,0,0);
-    const diff = Math.ceil((deadline - now) / 86400000);
+function toggleHW(id){ const hws=getHomeworks(),h=hws.find(x=>x.id===id);if(h){h.done=!h.done;saveHomeworks(hws);renderCurrentPage();} }
+function deleteHW(id){ if(!confirm('Удалить?'))return;saveHomeworks(getHomeworks().filter(h=>h.id!==id));renderCurrentPage(); }
 
-    let deadlineClass = 'ok';
-    let deadlineText = '';
-    if (hw.done) {
-        deadlineClass = 'ok';
-        deadlineText = '✅ Выполнено';
-    } else if (diff < 0) {
-        deadlineClass = 'overdue';
-        deadlineText = `Просрочено ${Math.abs(diff)} дн.`;
-    } else if (diff === 0) {
-        deadlineClass = 'overdue';
-        deadlineText = 'Сегодня!';
-    } else if (diff <= 3) {
-        deadlineClass = 'soon';
-        deadlineText = `Через ${diff} дн.`;
-    } else {
-        deadlineText = `${deadline.getDate()} ${MONTHS[deadline.getMonth()]}`;
+// ========== SESSION / DEBTS ==========
+function renderSession(){
+    const debts=getDebts();
+    const notPassed=debts.filter(d=>d.status==='not_passed').length;
+    const retakeSet=debts.filter(d=>d.status==='retake_set').length;
+    const passed=debts.filter(d=>d.status==='passed').length;
+
+    document.getElementById('debt-total').textContent=notPassed+retakeSet;
+    document.getElementById('debt-retake').textContent=retakeSet;
+    document.getElementById('debt-done').textContent=passed;
+
+    const sorted=[...debts.filter(d=>d.status==='retake_set'),...debts.filter(d=>d.status==='not_passed'),...debts.filter(d=>d.status==='passed')];
+    document.getElementById('debts-list').innerHTML=sorted.map(renderDebtCard).join('');
+}
+
+function renderDebtCard(d){
+    const statusLabels={not_passed:'❌ Не сдано',retake_set:'📅 Пересдача назначена',passed:'✅ Сдано'};
+    const statusClass={not_passed:'not-passed',retake_set:'retake-set',passed:'passed'};
+
+    let detailsHtml='';
+    if(d.retakeDate){
+        const rd=new Date(d.retakeDate);
+        const now=new Date();now.setHours(0,0,0,0);rd.setHours(0,0,0,0);
+        const diff=Math.ceil((rd-now)/864e5);
+        let countdown=diff<0?'Прошла — см. другие даты':diff===0?'🔴 СЕГОДНЯ!':`Через ${diff} дн.`;
+        let countdownColor=diff<=0?'var(--danger)':diff<=2?'var(--warning)':'var(--success)';
+        detailsHtml=`<div class="debt-details">
+            <div class="detail-row" style="font-weight:600;">📆 Ближайшая: ${formatDate(d.retakeDate)} <span style="margin-left:8px;font-size:12px;font-weight:700;color:${countdownColor};">${countdown}</span></div>
+            ${d.retakeTime?`<div class="detail-row">🕐 ${d.retakeTime}</div>`:''}
+            ${d.retakeInfo?`<div class="detail-row">📍 ${d.retakeInfo}</div>`:''}
+            ${d.commission?`<div class="detail-row" style="font-size:11px;color:var(--text-light);">👥 ${d.commission}</div>`:''}
+        </div>`;
     }
 
-    return `<div class="hw-card ${hw.done ? 'hw-done-card' : ''}">
-        <div class="hw-header">
-            <div class="hw-subject">${hw.subject}</div>
-            <div class="hw-deadline ${deadlineClass}">${deadlineText}</div>
-        </div>
-        <div class="hw-text">${hw.text}</div>
-        <div class="hw-footer">
-            <div class="hw-status" onclick="toggleHW('${hw.id}')">
-                <div class="hw-check ${hw.done ? 'done' : ''}">${hw.done ? '✓' : ''}</div>
-                <span>${hw.done ? 'Выполнено' : 'Отметить'}</span>
-            </div>
-            <button class="hw-delete" onclick="deleteHW('${hw.id}')">🗑</button>
-        </div>
+    // Show all dates
+    let allDatesHtml='';
+    if(d.allDates&&d.allDates.length>0){
+        allDatesHtml=`<div style="margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:12px;line-height:1.8;">
+            <div style="font-weight:600;margin-bottom:4px;color:var(--text-secondary);">📋 Все даты комиссий:</div>
+            ${d.allDates.map(dt=>`<div style="color:${dt.includes('✅')?'var(--text-light)':dt.includes('СЕГОДНЯ')?'var(--danger)':'var(--text)'};">${dt}</div>`).join('')}
+            ${d.pdfUrl?`<div style="margin-top:4px;"><a href="${d.pdfUrl}" target="_blank" style="color:var(--primary);text-decoration:none;font-weight:600;">📄 Скачать расписание PDF</a></div>`:''}
+        </div>`;
+    }
+
+    let actionsHtml='';
+    if(d.status!=='passed'){
+        actionsHtml=`<div class="debt-actions"><button class="debt-btn pass" onclick="passDebt('${d.id}')">✅ Сдал</button><button class="debt-btn edit" onclick="editDebtRetake('${d.id}')">📅 Изменить</button></div>`;
+    } else {
+        actionsHtml=`<div class="debt-actions"><button class="debt-btn unpass" onclick="unpassDebt('${d.id}')">↩️ Не сдал</button></div>`;
+    }
+
+    return `<div class="debt-card ${d.status==='retake_set'?'has-retake':''} ${d.status==='passed'?'passed':''}">
+        <div class="debt-header"><div class="debt-subject">${d.subject}</div><div class="debt-status ${statusClass[d.status]}">${statusLabels[d.status]}</div></div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📎 ${d.year}</div>
+        ${detailsHtml}
+        ${allDatesHtml}
+        ${actionsHtml}
     </div>`;
 }
 
-function toggleHW(id) {
-    const hws = getHomeworks();
-    const hw = hws.find(h => h.id === id);
-    if (hw) {
-        hw.done = !hw.done;
-        saveHomeworks(hws);
-        renderCurrentPage();
-    }
+function passDebt(id){ const ds=getDebts(),d=ds.find(x=>x.id===id);if(d){d.status='passed';saveDebts(ds);renderCurrentPage();} }
+function unpassDebt(id){ const ds=getDebts(),d=ds.find(x=>x.id===id);if(d){d.status='not_passed';d.retakeDate='';d.retakeInfo='';saveDebts(ds);renderCurrentPage();} }
+
+function editDebtRetake(id){
+    const ds=getDebts(),d=ds.find(x=>x.id===id);if(!d)return;
+    document.getElementById('modal-content').innerHTML=`
+        <div class="modal-title">📅 Назначить пересдачу</div>
+        <div style="font-weight:600;margin-bottom:12px;">${d.subject}</div>
+        <div class="form-group"><label class="form-label">Дата</label><input class="form-input" type="date" id="retake-d-date" value="${d.retakeDate||''}"></div>
+        <div class="form-group"><label class="form-label">Время</label><input class="form-input" id="retake-d-time" placeholder="10:00" value="${d.retakeTime||''}"></div>
+        <div class="form-group"><label class="form-label">Аудитория / Инфо</label><input class="form-input" id="retake-d-info" placeholder="Ауд. 301, Б22/1" value="${d.retakeInfo||''}"></div>
+        <button class="form-btn" onclick="saveDebtRetake('${id}')">Сохранить</button>`;
+    showModal();
 }
 
-function deleteHW(id) {
-    if (!confirm('Удалить задание?')) return;
-    const hws = getHomeworks().filter(h => h.id !== id);
-    saveHomeworks(hws);
-    renderCurrentPage();
+function saveDebtRetake(id){
+    const ds=getDebts(),d=ds.find(x=>x.id===id);if(!d)return;
+    const date=document.getElementById('retake-d-date').value;
+    const time=document.getElementById('retake-d-time').value.trim();
+    const info=document.getElementById('retake-d-info').value.trim();
+    if(!date){alert('Укажите дату');return;}
+    d.status='retake_set';d.retakeDate=date;d.retakeTime=time;d.retakeInfo=info;
+    saveDebts(ds);
+
+    // Also add to retakes list
+    const retakes=getRetakes();
+    if(!retakes.find(r=>r.debtId===id)){
+        retakes.push({id:Date.now().toString(),debtId:id,subject:d.subject,date,info:`${time?time+' · ':''}${info}`});
+        saveRetakes(retakes);
+    }
+    closeModalForce();renderCurrentPage();
+}
+
+function openAddDebtModal(){
+    document.getElementById('modal-content').innerHTML=`
+        <div class="modal-title">➕ Добавить долг</div>
+        <div class="form-group"><label class="form-label">Предмет</label><input class="form-input" id="new-debt-subj" placeholder="Название предмета"></div>
+        <div class="form-group"><label class="form-label">Учебный год</label><input class="form-input" id="new-debt-year" value="2025-2026" placeholder="2025-2026"></div>
+        <button class="form-btn" onclick="addDebt()">Добавить</button>`;
+    showModal();
+}
+
+function addDebt(){
+    const subj=document.getElementById('new-debt-subj').value.trim();
+    const year=document.getElementById('new-debt-year').value.trim();
+    if(!subj){alert('Укажите предмет');return;}
+    const ds=getDebts();
+    ds.push({id:'d'+Date.now(),subject:subj,status:'not_passed',retakeDate:'',retakeInfo:'',year:year||'2025-2026'});
+    saveDebts(ds);closeModalForce();renderCurrentPage();
 }
 
 // ========== RETAKES ==========
-function renderRetakes() {
-    const retakes = getRetakes().sort((a,b) => new Date(a.date) - new Date(b.date));
-    document.getElementById('retakes-list').innerHTML = retakes.length > 0 ?
-        retakes.map(r => renderRetakeCard(r)).join('') :
-        '<div class="empty-state"><div class="empty-icon">🎓</div><div class="empty-text">Пересдач нет — отлично!</div></div>';
+function renderRetakes(){
+    const retakes=getRetakes().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    document.getElementById('retakes-list').innerHTML=retakes.length?retakes.map(renderRetakeCard).join(''):'<div class="empty-state"><div class="empty-icon">🎓</div><div class="empty-text">Пересдач не назначено<br><small style="color:var(--text-light)">Добавьте через вкладку «Сессия»</small></div></div>';
 }
 
-function renderRetakeCard(retake) {
-    const now = new Date();
-    now.setHours(0,0,0,0);
-    const date = new Date(retake.date);
-    date.setHours(0,0,0,0);
-    const diff = Math.ceil((date - now) / 86400000);
-
-    let daysText = '';
-    if (diff < 0) daysText = 'Прошла';
-    else if (diff === 0) daysText = 'Сегодня!';
-    else daysText = `Через ${diff} дн.`;
-
-    return `<div class="retake-card">
-        <div class="retake-header">
-            <div class="retake-subject">${retake.subject}</div>
-            <div class="retake-date">${date.getDate()} ${MONTHS[date.getMonth()]}</div>
-        </div>
-        <div class="retake-info">${retake.info || ''}</div>
-        <div class="retake-footer">
-            <span class="retake-days-left">${daysText}</span>
-            <button class="retake-delete" onclick="deleteRetake('${retake.id}')">🗑</button>
-        </div>
-    </div>`;
+function renderRetakeCard(r){
+    const now=new Date();now.setHours(0,0,0,0);const d=new Date(r.date);d.setHours(0,0,0,0);const diff=Math.ceil((d-now)/864e5);
+    const dt=diff<0?'Прошла':diff===0?'Сегодня!':`Через ${diff} дн.`;
+    return `<div class="retake-card"><div class="retake-header"><div class="retake-subject">${r.subject}</div><div class="retake-date">${d.getDate()} ${MONTHS[d.getMonth()]}</div></div><div class="retake-info">${r.info||''}</div><div class="retake-footer"><span class="retake-days-left">${dt}</span><button class="retake-delete" onclick="deleteRetake('${r.id}')">🗑</button></div></div>`;
 }
 
-function deleteRetake(id) {
-    if (!confirm('Удалить пересдачу?')) return;
-    const retakes = getRetakes().filter(r => r.id !== id);
-    saveRetakes(retakes);
-    renderCurrentPage();
-}
+function deleteRetake(id){if(!confirm('Удалить?'))return;saveRetakes(getRetakes().filter(r=>r.id!==id));renderCurrentPage();}
 
 // ========== MODALS ==========
-function openAddModal() {
-    if (currentTab === 'homework') {
-        openAddHWModal();
-    } else if (currentTab === 'retakes') {
-        openAddRetakeModal();
-    }
-}
+function openAddModal(){if(currentTab==='homework')openAddHWModal();else if(currentTab==='retakes')openAddRetakeModal();}
 
-function openAddHWModal() {
-    const subjects = getSubjectsList();
-    const optionsHtml = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-
-    document.getElementById('modal-content').innerHTML = `
-        <div class="modal-title">📝 Новое ДЗ</div>
-        <div class="form-group">
-            <label class="form-label">Предмет</label>
-            <select class="form-select" id="hw-subject">
-                <option value="">Выберите предмет</option>
-                ${optionsHtml}
-                <option value="__custom">Другой...</option>
-            </select>
-        </div>
-        <div class="form-group" id="hw-custom-subject-wrap" style="display:none;">
-            <label class="form-label">Название предмета</label>
-            <input class="form-input" id="hw-custom-subject" placeholder="Введите название">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Задание</label>
-            <textarea class="form-textarea" id="hw-text" placeholder="Опишите задание..."></textarea>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Дедлайн</label>
-            <input class="form-input" type="date" id="hw-deadline">
-        </div>
-        <button class="form-btn" onclick="addHW()">Добавить</button>
-    `;
-
-    document.getElementById('hw-subject').addEventListener('change', function() {
-        document.getElementById('hw-custom-subject-wrap').style.display =
-            this.value === '__custom' ? 'block' : 'none';
-    });
-
+function openAddHWModal(){
+    const opts=getSubjectsList().map(s=>`<option value="${s}">${s}</option>`).join('');
+    document.getElementById('modal-content').innerHTML=`<div class="modal-title">📝 Новое ДЗ</div><div class="form-group"><label class="form-label">Предмет</label><select class="form-select" id="hw-subject" onchange="document.getElementById('hw-cw').style.display=this.value==='__custom'?'block':'none'"><option value="">Выберите</option>${opts}<option value="__custom">Другой...</option></select></div><div class="form-group" id="hw-cw" style="display:none"><label class="form-label">Название</label><input class="form-input" id="hw-cs" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Задание</label><textarea class="form-textarea" id="hw-text" placeholder="Опишите..."></textarea></div><div class="form-group"><label class="form-label">Дедлайн</label><input class="form-input" type="date" id="hw-dl"></div><button class="form-btn" onclick="addHW()">Добавить</button>`;
     showModal();
 }
 
-function openAddRetakeModal() {
-    const subjects = getSubjectsList();
-    const optionsHtml = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-
-    document.getElementById('modal-content').innerHTML = `
-        <div class="modal-title">🔄 Новая пересдача</div>
-        <div class="form-group">
-            <label class="form-label">Предмет</label>
-            <select class="form-select" id="retake-subject">
-                <option value="">Выберите предмет</option>
-                ${optionsHtml}
-                <option value="__custom">Другой...</option>
-            </select>
-        </div>
-        <div class="form-group" id="retake-custom-subject-wrap" style="display:none;">
-            <label class="form-label">Название предмета</label>
-            <input class="form-input" id="retake-custom-subject" placeholder="Введите название">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Дата пересдачи</label>
-            <input class="form-input" type="date" id="retake-date">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Дополнительно</label>
-            <textarea class="form-textarea" id="retake-info" placeholder="Кабинет, время, преподаватель..."></textarea>
-        </div>
-        <button class="form-btn" onclick="addRetake()">Добавить</button>
-    `;
-
-    document.getElementById('retake-subject').addEventListener('change', function() {
-        document.getElementById('retake-custom-subject-wrap').style.display =
-            this.value === '__custom' ? 'block' : 'none';
-    });
-
+function openAddRetakeModal(){
+    const opts=getSubjectsList().map(s=>`<option value="${s}">${s}</option>`).join('');
+    document.getElementById('modal-content').innerHTML=`<div class="modal-title">🔄 Новая пересдача</div><div class="form-group"><label class="form-label">Предмет</label><select class="form-select" id="rt-subj" onchange="document.getElementById('rt-cw').style.display=this.value==='__custom'?'block':'none'"><option value="">Выберите</option>${opts}<option value="__custom">Другой...</option></select></div><div class="form-group" id="rt-cw" style="display:none"><label class="form-label">Название</label><input class="form-input" id="rt-cs" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Дата</label><input class="form-input" type="date" id="rt-date"></div><div class="form-group"><label class="form-label">Дополнительно</label><textarea class="form-textarea" id="rt-info" placeholder="Кабинет, время..."></textarea></div><button class="form-btn" onclick="addRetake()">Добавить</button>`;
     showModal();
 }
 
-function openEditScheduleModal() {
-    const schedule = getSchedule();
-    const lessons = schedule[currentWeekType] && schedule[currentWeekType][selectedDay]
-        ? schedule[currentWeekType][selectedDay] : [];
-
-    const dayName = DAYS[selectedDay === 7 ? 0 : selectedDay];
-    const weekName = currentWeekType === 1 ? 'нечётная' : 'чётная';
-
-    let lessonsHtml = lessons.map((l, i) => `
-        <div class="card" style="padding: 10px 12px; margin-bottom: 8px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:600; font-size:14px;">${l.num}. ${l.name}</span>
-                <button class="hw-delete" onclick="removeLesson(${i})" style="font-size:16px;">✕</button>
-            </div>
-            <div style="font-size:12px; color:var(--text-secondary);">${l.time} · ${l.room}</div>
-        </div>
-    `).join('');
-
-    if (!lessonsHtml) lessonsHtml = '<div style="color:var(--text-light); text-align:center; padding:12px;">Нет пар</div>';
-
-    document.getElementById('modal-content').innerHTML = `
-        <div class="modal-title">✏️ ${dayName} (${weekName})</div>
-        ${lessonsHtml}
-        <div style="border-top: 1px solid var(--border); margin: 14px 0; padding-top: 14px;">
-            <div style="font-weight: 600; margin-bottom: 10px;">Добавить пару:</div>
-            <div class="form-group">
-                <label class="form-label">Номер пары</label>
-                <input class="form-input" type="number" id="les-num" min="1" max="8" value="${lessons.length + 1}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Название</label>
-                <input class="form-input" id="les-name" placeholder="Название предмета">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Тип</label>
-                <select class="form-select" id="les-type">
-                    <option value="lecture">Лекция</option>
-                    <option value="seminar">Семинар</option>
-                    <option value="lab">Лабораторная</option>
-                    <option value="practice">Практика</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Время</label>
-                <input class="form-input" id="les-time" placeholder="9:30 - 11:00">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Кабинет</label>
-                <input class="form-input" id="les-room" placeholder="Каб. 301">
-            </div>
-            <button class="form-btn" onclick="addLesson()">Добавить пару</button>
-        </div>
-    `;
-
+function openEditScheduleModal(){
+    const sch=getSchedule(),les=sch[currentWeekType]&&sch[currentWeekType][selectedDay]?sch[currentWeekType][selectedDay]:[];
+    const dn=DAYS[selectedDay===7?0:selectedDay],wn=currentWeekType===1?'нечётная':'чётная';
+    let list=les.map((l,i)=>`<div class="card" style="padding:10px 12px;margin-bottom:8px;"><div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:600;font-size:14px;">${l.num}. ${l.name}</span><button class="hw-delete" onclick="removeLesson(${i})" style="font-size:16px;">✕</button></div><div style="font-size:12px;color:var(--text-secondary);">${l.time} · ${l.room}</div>${l.teacher?`<div style="font-size:11px;color:var(--text-light);">${l.teacher}</div>`:''}</div>`).join('');
+    if(!list)list='<div style="color:var(--text-light);text-align:center;padding:12px;">Нет пар</div>';
+    document.getElementById('modal-content').innerHTML=`<div class="modal-title">✏️ ${dn} (${wn})</div>${list}<div style="border-top:1px solid var(--border);margin:14px 0;padding-top:14px;"><div style="font-weight:600;margin-bottom:10px;">Добавить пару:</div><div class="form-group"><label class="form-label">Номер</label><input class="form-input" id="les-num" value="${les.length+1}"></div><div class="form-group"><label class="form-label">Название</label><input class="form-input" id="les-name" placeholder="Предмет"></div><div class="form-group"><label class="form-label">Тип</label><select class="form-select" id="les-type"><option value="lecture">Лекция</option><option value="practice">Практика</option><option value="lab">Лаб. работа</option><option value="seminar">Семинар</option></select></div><div class="form-group"><label class="form-label">Время</label><input class="form-input" id="les-time" placeholder="09:00 - 10:35"></div><div class="form-group"><label class="form-label">Аудитория</label><input class="form-input" id="les-room" placeholder="Ауд. 301, Б22/1"></div><div class="form-group"><label class="form-label">Преподаватель</label><input class="form-input" id="les-teacher" placeholder="Иванов И.И."></div><button class="form-btn" onclick="addLesson()">Добавить</button></div>`;
     showModal();
 }
 
-function addLesson() {
-    const name = document.getElementById('les-name').value.trim();
-    const num = parseInt(document.getElementById('les-num').value);
-    const type = document.getElementById('les-type').value;
-    const time = document.getElementById('les-time').value.trim();
-    const room = document.getElementById('les-room').value.trim();
-
-    if (!name || !time) { alert('Заполните название и время'); return; }
-
-    const schedule = getSchedule();
-    if (!schedule[currentWeekType]) schedule[currentWeekType] = {};
-    if (!schedule[currentWeekType][selectedDay]) schedule[currentWeekType][selectedDay] = [];
-
-    schedule[currentWeekType][selectedDay].push({ num, type, name, time, room });
-    schedule[currentWeekType][selectedDay].sort((a,b) => a.num - b.num);
-
-    saveSchedule(schedule);
-    closeModalForce();
-    renderSchedule();
+function addLesson(){
+    const name=document.getElementById('les-name').value.trim(),num=document.getElementById('les-num').value.trim(),type=document.getElementById('les-type').value,time=document.getElementById('les-time').value.trim(),room=document.getElementById('les-room').value.trim(),teacher=document.getElementById('les-teacher').value.trim();
+    if(!name||!time){alert('Заполните название и время');return;}
+    const sch=getSchedule();if(!sch[currentWeekType])sch[currentWeekType]={};if(!sch[currentWeekType][selectedDay])sch[currentWeekType][selectedDay]=[];
+    sch[currentWeekType][selectedDay].push({num:isNaN(parseInt(num))?num:parseInt(num),type,name,time,room,teacher});
+    sch[currentWeekType][selectedDay].sort((a,b)=>(typeof a.num==='number'?a.num:99)-(typeof b.num==='number'?b.num:99));
+    saveSchedule(sch);closeModalForce();renderSchedule();
 }
 
-function removeLesson(index) {
-    if (!confirm('Удалить эту пару?')) return;
-    const schedule = getSchedule();
-    schedule[currentWeekType][selectedDay].splice(index, 1);
-    saveSchedule(schedule);
-    closeModalForce();
-    renderSchedule();
-    openEditScheduleModal();
+function removeLesson(i){if(!confirm('Удалить?'))return;const sch=getSchedule();sch[currentWeekType][selectedDay].splice(i,1);saveSchedule(sch);closeModalForce();renderSchedule();openEditScheduleModal();}
+
+function addHW(){
+    let s=document.getElementById('hw-subject').value;if(s==='__custom')s=document.getElementById('hw-cs').value.trim();
+    const t=document.getElementById('hw-text').value.trim(),dl=document.getElementById('hw-dl').value;
+    if(!s||!t||!dl){alert('Заполните все поля');return;}
+    const hws=getHomeworks();hws.push({id:Date.now().toString(),subject:s,text:t,deadline:dl,done:false});saveHomeworks(hws);closeModalForce();renderCurrentPage();
 }
 
-function addHW() {
-    let subject = document.getElementById('hw-subject').value;
-    if (subject === '__custom') subject = document.getElementById('hw-custom-subject').value.trim();
-    const text = document.getElementById('hw-text').value.trim();
-    const deadline = document.getElementById('hw-deadline').value;
-
-    if (!subject || !text || !deadline) { alert('Заполните все поля'); return; }
-
-    const hws = getHomeworks();
-    hws.push({ id: Date.now().toString(), subject, text, deadline, done: false });
-    saveHomeworks(hws);
-    closeModalForce();
-    renderCurrentPage();
+function addRetake(){
+    let s=document.getElementById('rt-subj').value;if(s==='__custom')s=document.getElementById('rt-cs').value.trim();
+    const d=document.getElementById('rt-date').value,info=document.getElementById('rt-info').value.trim();
+    if(!s||!d){alert('Заполните предмет и дату');return;}
+    const rs=getRetakes();rs.push({id:Date.now().toString(),subject:s,date:d,info});saveRetakes(rs);closeModalForce();renderCurrentPage();
 }
 
-function addRetake() {
-    let subject = document.getElementById('retake-subject').value;
-    if (subject === '__custom') subject = document.getElementById('retake-custom-subject').value.trim();
-    const date = document.getElementById('retake-date').value;
-    const info = document.getElementById('retake-info').value.trim();
-
-    if (!subject || !date) { alert('Заполните предмет и дату'); return; }
-
-    const retakes = getRetakes();
-    retakes.push({ id: Date.now().toString(), subject, date, info });
-    saveRetakes(retakes);
-    closeModalForce();
-    renderCurrentPage();
+function getSubjectsList(){
+    const sch=getSchedule(),subj=new Set();
+    for(const wt of Object.values(sch))for(const day of Object.values(wt))if(Array.isArray(day))day.forEach(l=>subj.add(l.name));
+    getDebts().forEach(d=>subj.add(d.subject));
+    return[...subj].sort();
 }
 
-function getSubjectsList() {
-    const schedule = getSchedule();
-    const subjects = new Set();
-    for (const wt of Object.values(schedule)) {
-        for (const day of Object.values(wt)) {
-            if (Array.isArray(day)) {
-                day.forEach(l => subjects.add(l.name));
-            }
-        }
-    }
-    return [...subjects].sort();
-}
+function formatDate(ds){if(!ds)return'';const d=new Date(ds);return`${d.getDate()} ${MONTHS[d.getMonth()]}`;}
 
 // ========== MODAL UTILS ==========
-function showModal() {
-    document.getElementById('modal-overlay').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
+function showModal(){document.getElementById('modal-overlay').classList.add('show');document.body.style.overflow='hidden';}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalForce();}
+function closeModalForce(){document.getElementById('modal-overlay').classList.remove('show');document.body.style.overflow='';}
 
-function closeModal(e) {
-    if (e.target === document.getElementById('modal-overlay')) {
-        closeModalForce();
-    }
-}
-
-function closeModalForce() {
-    document.getElementById('modal-overlay').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-// ========== TELEGRAM WEBAPP ==========
-try {
-    if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-
-        // Apply Telegram theme
-        const theme = Telegram.WebApp.themeParams;
-        if (theme) {
-            if (theme.bg_color) document.documentElement.style.setProperty('--bg', theme.secondary_bg_color || '#F0F2F5');
-            if (theme.section_bg_color) document.documentElement.style.setProperty('--card', theme.section_bg_color || theme.bg_color);
-            if (theme.text_color) document.documentElement.style.setProperty('--text', theme.text_color);
-            if (theme.hint_color) document.documentElement.style.setProperty('--text-secondary', theme.hint_color);
-            if (theme.button_color) {
-                document.documentElement.style.setProperty('--primary', theme.button_color);
-            }
-        }
-    }
-} catch(e) {}
+// ========== TELEGRAM ==========
+try{if(window.Telegram&&Telegram.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand();const t=Telegram.WebApp.themeParams;if(t){if(t.secondary_bg_color)document.documentElement.style.setProperty('--bg',t.secondary_bg_color);if(t.section_bg_color)document.documentElement.style.setProperty('--card',t.section_bg_color);else if(t.bg_color)document.documentElement.style.setProperty('--card',t.bg_color);if(t.text_color)document.documentElement.style.setProperty('--text',t.text_color);if(t.hint_color)document.documentElement.style.setProperty('--text-secondary',t.hint_color);if(t.button_color)document.documentElement.style.setProperty('--primary',t.button_color);}}}catch(e){}
 
 // ========== INIT ==========
-// Auto-detect week type
-currentWeekType = getAutoWeekType();
-document.getElementById('week-btn-1').classList.toggle('active', currentWeekType === 1);
-document.getElementById('week-btn-2').classList.toggle('active', currentWeekType === 2);
-
-// Hide FAB initially
-document.getElementById('fab-btn').style.display = 'none';
-
-// Initial render
+currentWeekType=getAutoWeekType();
+document.getElementById('week-btn-1').classList.toggle('active',currentWeekType===1);
+document.getElementById('week-btn-2').classList.toggle('active',currentWeekType===2);
+document.getElementById('fab-btn').style.display='none';
 renderHome();
 </script>
 </body>
